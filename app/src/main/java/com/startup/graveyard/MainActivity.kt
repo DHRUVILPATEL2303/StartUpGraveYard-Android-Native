@@ -11,6 +11,8 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import com.google.firebase.auth.FirebaseAuth
+import com.startup.graveyard.presentation.navigation.AppNavigation
 import com.startup.graveyard.ui.theme.StartUpGraveYardTheme
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -19,13 +21,11 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+        val firebaseAuth= FirebaseAuth.getInstance()
         setContent {
             StartUpGraveYardTheme {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    Greeting(
-                        name = "Android",
-                        modifier = Modifier.padding(innerPadding)
-                    )
+                    AppNavigation(firebaseAuth =firebaseAuth)
                 }
             }
         }
