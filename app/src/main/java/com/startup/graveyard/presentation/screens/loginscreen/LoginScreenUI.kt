@@ -15,12 +15,16 @@ import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
@@ -48,15 +52,17 @@ fun LoginScreenUI(
 
     val loginState by authViewModel.loginState.collectAsState()
 
-    val primaryColor = Color(0xFF6C5CE7)
-    val secondaryColor = Color(0xFFA29BFE)
-    val backgroundColor = Color(0xFFFFFFFF)
-    val surfaceColor = Color(0xFFFFFFFF)
-    val textColor = Color(0xFF2D2D2D)
-    val secondaryTextColor = Color(0xFF757575)
-    val errorColor = Color(0xFFFF6B6B)
-    val borderColor = Color(0xFFE0E0E0)
-    val inputBackgroundColor = Color(0xFFF8F9FA)
+    val colorScheme = androidx.compose.material3.MaterialTheme.colorScheme
+    val typography = androidx.compose.material3.MaterialTheme.typography
+    val primaryColor = colorScheme.primary
+    val secondaryColor = colorScheme.secondary
+    val backgroundColor = colorScheme.background
+    val surfaceColor = colorScheme.surface
+    val textColor = colorScheme.onBackground
+    val secondaryTextColor = colorScheme.onSurface.copy(alpha = 0.7f)
+    val errorColor = colorScheme.error
+    val borderColor = colorScheme.outline.copy(alpha = 0.3f)
+    val inputBackgroundColor = colorScheme.surfaceVariant.copy(alpha = 0.25f)
 
     LaunchedEffect(loginState) {
         if (loginState.data != null) {
@@ -96,7 +102,7 @@ fun LoginScreenUI(
                     Text(
                         text = "💀",
                         fontSize = 40.sp,
-                        color = Color.White
+                        color = colorScheme.onPrimary
                     )
                 }
 
@@ -104,16 +110,16 @@ fun LoginScreenUI(
 
                 Text(
                     text = "Welcome Back",
-                    fontSize = 32.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = textColor,
+                    style = typography.headlineMedium.copy(
+                        color = textColor,
+                        fontWeight = FontWeight.Bold
+                    ),
                     textAlign = TextAlign.Center
                 )
 
                 Text(
                     text = "Sign in to StartUp GraveYard",
-                    fontSize = 16.sp,
-                    color = secondaryTextColor,
+                    style = typography.bodyMedium.copy(color = secondaryTextColor),
                     textAlign = TextAlign.Center,
                     modifier = Modifier.padding(top = 8.dp)
                 )
@@ -130,7 +136,6 @@ fun LoginScreenUI(
                     modifier = Modifier.padding(horizontal = 4.dp),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    
                     OutlinedTextField(
                         value = email.value,
                         onValueChange = {
@@ -315,7 +320,7 @@ fun LoginScreenUI(
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
                                 CircularProgressIndicator(
-                                    color = Color.White,
+                                    color = colorScheme.onPrimary,
                                     modifier = Modifier.size(20.dp),
                                     strokeWidth = 2.dp
                                 )
@@ -324,7 +329,7 @@ fun LoginScreenUI(
                                     "Signing In...",
                                     fontSize = 16.sp,
                                     fontWeight = FontWeight.SemiBold,
-                                    color = Color.White
+                                    color = colorScheme.onPrimary
                                 )
                             }
                         } else {
@@ -332,7 +337,7 @@ fun LoginScreenUI(
                                 "Sign In",
                                 fontSize = 18.sp,
                                 fontWeight = FontWeight.Bold,
-                                color = Color.White
+                                color = colorScheme.onPrimary
                             )
                         }
                     }

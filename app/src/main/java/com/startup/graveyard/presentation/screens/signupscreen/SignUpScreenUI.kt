@@ -1,13 +1,17 @@
 package com.startup.graveyard.presentation.screens.signupscreen
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.*
+import androidx.compose.material.Card
+import androidx.compose.material.Divider
+import androidx.compose.material.Icon
+import androidx.compose.material.IconButton
+import androidx.compose.material.OutlinedTextField
+import androidx.compose.material.TextFieldDefaults
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Lock
@@ -17,13 +21,17 @@ import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.runtime.*
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
@@ -35,7 +43,6 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.google.firebase.auth.FirebaseAuth
 import com.startup.graveyard.domain.models.CreateAccountModel
 import com.startup.graveyard.presentation.viewmodels.AuthViewModel
-import java.util.*
 
 @Composable
 fun SignUpScreenUI(
@@ -59,15 +66,18 @@ fun SignUpScreenUI(
 
     val createAccountState by authViewModel.createAccountState.collectAsState()
 
-    val primaryColor = Color(0xFF6C5CE7)
-    val secondaryColor = Color(0xFFA29BFE)
-    val backgroundColor = Color(0xFFFFFFFF)
-    val surfaceColor = Color(0xFFFFFFFF)
-    val textColor = Color(0xFF2D2D2D)
-    val secondaryTextColor = Color(0xFF757575)
-    val errorColor = Color(0xFFFF6B6B)
-    val borderColor = Color(0xFFE0E0E0)
-    val inputBackgroundColor = Color(0xFFF8F9FA)
+    val colorScheme = androidx.compose.material3.MaterialTheme.colorScheme
+    val typography = androidx.compose.material3.MaterialTheme.typography
+    val primaryColor = colorScheme.primary
+    val secondaryColor = colorScheme.secondary
+    val backgroundColor = colorScheme.background
+    val surfaceColor = colorScheme.surface
+    val textColor = colorScheme.onBackground
+    val secondaryTextColor = colorScheme.onSurface.copy(alpha = 0.7f)
+    val errorColor = colorScheme.error
+    val borderColor = colorScheme.outline.copy(alpha = 0.3f)
+    val inputBackgroundColor = colorScheme.surfaceVariant.copy(alpha = 0.25f)
+
 
     LaunchedEffect(createAccountState) {
         if (createAccountState.data != null) {
@@ -107,7 +117,7 @@ fun SignUpScreenUI(
                     Text(
                         text = "💀",
                         fontSize = 32.sp,
-                        color = Color.White
+                        color = colorScheme.onPrimary
                     )
                 }
 
@@ -115,16 +125,16 @@ fun SignUpScreenUI(
 
                 Text(
                     text = "StartUp GraveYard",
-                    fontSize = 28.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = textColor,
+                    style = typography.headlineSmall.copy(
+                        color = textColor,
+                        fontWeight = FontWeight.Bold
+                    ),
                     textAlign = TextAlign.Center
                 )
 
                 Text(
                     text = "Where ideas find new life",
-                    fontSize = 14.sp,
-                    color = secondaryTextColor,
+                    style = typography.bodyMedium.copy(color = secondaryTextColor),
                     textAlign = TextAlign.Center,
                     modifier = Modifier.padding(top = 4.dp)
                 )
@@ -143,10 +153,11 @@ fun SignUpScreenUI(
                 ) {
                     Text(
                         text = "Create Account",
-                        fontSize = 24.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = textColor,
-                        modifier = Modifier.padding(bottom = 24.dp)
+                        style = typography.titleLarge.copy(
+                            color = textColor,
+                            fontWeight = FontWeight.Bold
+                        ),
+                        modifier = Modifier.padding(bottom = 24.dp, top = 20.dp)
                     )
 
                     OutlinedTextField(
@@ -258,8 +269,7 @@ fun SignUpScreenUI(
                                 )
                             }
                         },
-                        visualTransformation = if (passwordVisible.value) VisualTransformation.None
-                        else PasswordVisualTransformation(),
+                        visualTransformation = if (passwordVisible.value) VisualTransformation.None else PasswordVisualTransformation(),
                         modifier = Modifier.fillMaxWidth(),
                         colors = TextFieldDefaults.outlinedTextFieldColors(
                             textColor = textColor,
@@ -313,8 +323,7 @@ fun SignUpScreenUI(
                                 )
                             }
                         },
-                        visualTransformation = if (confirmPasswordVisible.value) VisualTransformation.None
-                        else PasswordVisualTransformation(),
+                        visualTransformation = if (confirmPasswordVisible.value) VisualTransformation.None else PasswordVisualTransformation(),
                         modifier = Modifier.fillMaxWidth(),
                         colors = TextFieldDefaults.outlinedTextFieldColors(
                             textColor = textColor,
@@ -425,7 +434,7 @@ fun SignUpScreenUI(
                     ) {
                         if (createAccountState.isLoading) {
                             CircularProgressIndicator(
-                                color = Color.White,
+                                color = colorScheme.onPrimary,
                                 modifier = Modifier.size(24.dp),
                                 strokeWidth = 2.dp
                             )
@@ -434,7 +443,7 @@ fun SignUpScreenUI(
                                 "Create Account",
                                 fontSize = 16.sp,
                                 fontWeight = FontWeight.SemiBold,
-                                color = Color.White
+                                color = colorScheme.onPrimary
                             )
                         }
                     }
@@ -451,7 +460,7 @@ fun SignUpScreenUI(
                             color = secondaryTextColor,
                             fontSize = 14.sp
                         )
-                        TextButton(onClick = onNavigateToLogin) {
+                        androidx.compose.material.TextButton(onClick = onNavigateToLogin) {
                             Text(
                                 text = "Sign In",
                                 color = primaryColor,

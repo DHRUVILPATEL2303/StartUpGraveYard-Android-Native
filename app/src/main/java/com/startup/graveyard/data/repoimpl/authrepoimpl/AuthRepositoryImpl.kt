@@ -1,6 +1,7 @@
 package com.startup.graveyard.data.repoimpl.authrepoimpl
 
 import android.util.Log
+import androidx.collection.emptyIntSet
 import androidx.compose.ui.graphics.RectangleShape
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
@@ -8,6 +9,8 @@ import com.startup.graveyard.common.ResultState
 import com.startup.graveyard.data.remote.AuthApi
 import com.startup.graveyard.domain.models.CreateAccountModel
 import com.startup.graveyard.domain.models.CreatedAccountResponseModel
+import com.startup.graveyard.domain.models.UpdateUserAccountRequestModel
+import com.startup.graveyard.domain.models.UserAccountResponseModel
 import com.startup.graveyard.domain.repo.authrepo.AuthRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
@@ -34,7 +37,6 @@ class AuthRepositoryImpl @Inject constructor(
         Log.d(TAG, " Emitted Loading state")
 
         try {
-            // ------------------ Firebase Signup ------------------
             Log.d(TAG, " Creating Firebase user with email=${createAccountModel.email}")
 
             val authResult = firebaseAuth
@@ -55,11 +57,9 @@ class AuthRepositoryImpl @Inject constructor(
             Log.d(TAG, " Firebase user created")
             Log.d(TAG, " Firebase UID: ${firebaseUser.uid}")
 
-            // ------------------ Update UUID ------------------
             createAccountModel.uuid = firebaseUser.uid
             Log.d(TAG, "️ UUID updated in model: ${createAccountModel.uuid}")
 
-            // ------------------ Backend API Call ------------------
             Log.d(TAG, " Calling backend createAccount API")
 
             val response = authApi.createAccount(createAccountModel)
@@ -76,7 +76,6 @@ class AuthRepositoryImpl @Inject constructor(
                 Log.d(TAG, " Emitted Success state")
 
             } else {
-                // ------------------ Rollback Firebase User ------------------
                 Log.e(TAG, " Backend account creation failed")
                 Log.e(TAG, "️ Rolling back Firebase user")
 
@@ -113,4 +112,44 @@ class AuthRepositoryImpl @Inject constructor(
 
 
     }
+
+    override suspend fun getUserAccountDetails(): Flow<ResultState<UserAccountResponseModel>> =
+        flow {
+            emit(ResultState.Loading)
+
+            try {
+                val uuid = firebaseAuth.uid
+                val response = authApi.getAccountDetails(uuid.toString())
+                if (response.isSuccessful && response.body() != null) {
+                    emit(ResultState.Success(response.body()!!))
+
+                } else {
+                    emit(ResultState.Error("Something Went Wrong"))
+                }
+
+            } catch (e: Exception) {
+                emit(ResultState.Error(e.message.toString()))
+            }
+        }
+
+    override suspend fun updateAccount(updateUserAccountRequestModel: UpdateUserAccountRequestModel): Flow<ResultState<UserAccountResponseModel>> =
+        flow {
+
+            emit(ResultState.Loading)
+
+            try {
+                val uuid = firebaseAuth.uid
+                updateUserAccountRequestModel.uuid = uuid.toString()
+
+                val response = authApi.updateAccount(uuid.toString(), updateUserAccountRequestModel)
+                if (response.isSuccessful && response.body() != null) {
+                    emit(ResultState.Success(response.body()!!))
+                } else {
+                    emit(ResultState.Error("Something Went Wrong"))
+                }
+
+            } catch (e: Exception) {
+                emit(ResultState.Error(e.message.toString()))
+            }
+        }
 }

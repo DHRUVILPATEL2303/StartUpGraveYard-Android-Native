@@ -26,6 +26,12 @@ sealed class Routes {
 
     @Serializable
     object SellerAddProduct
+
+    @Serializable
+    object Splash
+
+    @Serializable
+    object AccountScreen
 }
 
 

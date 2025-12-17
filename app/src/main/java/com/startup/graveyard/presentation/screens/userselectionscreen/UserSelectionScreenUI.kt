@@ -1,50 +1,110 @@
+@file:OptIn(ExperimentalMaterial3Api::class)
+
 package com.startup.graveyard.presentation.screens.userselectionscreen
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AccountCircle
+import androidx.compose.material.icons.filled.ArrowForwardIos
+import androidx.compose.material.icons.filled.ShoppingCart
+import androidx.compose.material.icons.filled.Store
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CenterAlignedTopAppBar
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ShoppingCart
-import androidx.compose.material.icons.filled.Store
-import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavController
+import com.startup.graveyard.presentation.navigation.Routes
+import com.startup.graveyard.presentation.viewmodels.AuthViewModel
 
 @Composable
 fun UserSelectionScreenUI(
     onBuyerSelected: () -> Unit,
-    onSellerSelected: () -> Unit
+    onSellerSelected: () -> Unit,
+    navController: NavController,
+    authViewModel: AuthViewModel = hiltViewModel()
 ) {
-    Scaffold { padding ->
+    val accountState = authViewModel.accountState.collectAsState()
+    val colorScheme = MaterialTheme.colorScheme
+    val typography = MaterialTheme.typography
+
+    LaunchedEffect(Unit) {
+        authViewModel.getUserAccountDetails()
+    }
+
+    Scaffold(
+        topBar = {
+            CenterAlignedTopAppBar(
+                title = {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Text(
+                            text = "Welcome",
+                            style = typography.titleMedium.copy(fontWeight = FontWeight.SemiBold),
+                            color = colorScheme.onSurface
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(
+                            text = accountState.value.data?.data?.name.orEmpty(),
+                            style = typography.titleMedium.copy(fontWeight = FontWeight.ExtraBold),
+                            color = colorScheme.primary
+                        )
+                    }
+                },
+                navigationIcon = {
+                    Icon(
+                        imageVector = Icons.Default.AccountCircle,
+                        contentDescription = null,
+                        tint = colorScheme.onSurface,
+                        modifier = Modifier
+                            .padding(start = 16.dp)
+                            .clickable { navController.navigate(Routes.AccountScreen) }
+                    )
+                }
+            )
+        }
+    ) { padding ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
+                .background(colorScheme.background)
                 .padding(padding)
-                .padding(24.dp),
+                .padding(horizontal = 24.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-
-            Spacer(modifier = Modifier.height(40.dp))
+            Spacer(modifier = Modifier.height(32.dp))
 
             Text(
-                text = "Choose your role",
-                fontSize = 26.sp,
-                fontWeight = FontWeight.Bold
+                text = "Choose how you want to continue",
+                style = typography.headlineSmall.copy(
+                    fontWeight = FontWeight.Bold,
+                    color = colorScheme.onBackground
+                ),
+                textAlign = TextAlign.Center
             )
 
             Spacer(modifier = Modifier.height(8.dp))
 
             Text(
-                text = "How do you want to use the app?",
-                fontSize = 16.sp,
-                color = Color.Gray,
+                text = "You can switch roles later from profile",
+                style = typography.bodyMedium.copy(color = colorScheme.onSurfaceVariant),
                 textAlign = TextAlign.Center
             )
 
@@ -53,8 +113,11 @@ fun UserSelectionScreenUI(
             RoleCard(
                 icon = Icons.Default.ShoppingCart,
                 title = "Buyer",
-                containerColor = MaterialTheme.colorScheme.primaryContainer,
-                onClick = onBuyerSelected
+                containerColor = colorScheme.primaryContainer,
+                onClick = onBuyerSelected,
+                iconTint = colorScheme.onPrimaryContainer,
+                textColor = colorScheme.onPrimaryContainer,
+                arrowTint = colorScheme.onSurfaceVariant
             )
 
             Spacer(modifier = Modifier.height(20.dp))
@@ -62,53 +125,75 @@ fun UserSelectionScreenUI(
             RoleCard(
                 icon = Icons.Default.Store,
                 title = "Seller",
-                containerColor = MaterialTheme.colorScheme.secondaryContainer,
-                onClick = onSellerSelected
+                containerColor = colorScheme.secondaryContainer,
+                onClick = onSellerSelected,
+                iconTint = colorScheme.onSecondaryContainer,
+                textColor = colorScheme.onSecondaryContainer,
+                arrowTint = colorScheme.onSurfaceVariant
             )
         }
     }
 }
-
 
 @Composable
 fun RoleCard(
     icon: ImageVector,
     title: String,
     containerColor: Color,
-    onClick: () -> Unit
+    onClick: () -> Unit,
+    iconTint: Color,
+    textColor: Color,
+    arrowTint: Color
 ) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .height(120.dp)
+            .height(130.dp)
             .clickable { onClick() },
         shape = RoundedCornerShape(20.dp),
         colors = CardDefaults.cardColors(containerColor = containerColor),
-        elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
+        elevation = CardDefaults.cardElevation(defaultElevation = 6.dp)
     ) {
         Row(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(20.dp),
+                .padding(horizontal = 20.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Icon(
-                imageVector = icon,
-                contentDescription = title,
-                modifier = Modifier.size(40.dp)
-            )
+            Box(
+                modifier = Modifier
+                    .size(56.dp)
+                    .background(
+                        color = MaterialTheme.colorScheme.surface,
+                        shape = RoundedCornerShape(16.dp)
+                    ),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    imageVector = icon,
+                    contentDescription = title,
+                    modifier = Modifier.size(30.dp),
+                    tint = iconTint
+                )
+            }
 
             Spacer(modifier = Modifier.width(20.dp))
 
-            Column {
+            Column(modifier = Modifier.weight(1f)) {
                 Text(
                     text = title,
                     fontSize = 20.sp,
-                    fontWeight = FontWeight.Bold
+                    fontWeight = FontWeight.Bold,
+                    color = textColor
                 )
                 Spacer(modifier = Modifier.height(4.dp))
-
             }
+
+            Icon(
+                imageVector = Icons.Default.ArrowForwardIos,
+                contentDescription = null,
+                tint = arrowTint
+            )
         }
     }
 }

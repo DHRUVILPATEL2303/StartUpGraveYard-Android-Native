@@ -11,6 +11,8 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import com.airbnb.lottie.compose.LottieCompositionSpec
+import com.airbnb.lottie.compose.rememberLottieComposition
 import com.google.firebase.auth.FirebaseAuth
 import com.startup.graveyard.presentation.navigation.AppNavigation
 import com.startup.graveyard.presentation.navigation.SubNavigation
@@ -36,12 +38,19 @@ class MainActivity : ComponentActivity() {
                 Scaffold(modifier = Modifier.fillMaxSize()) {innerPaddding->
                     AppNavigation(
                         firebaseAuth = firebaseAuth,
-                        startDestination = startDestination
                     )
+                    PreloadLottie()
                 }
             }
         }
     }
+}
+
+@Composable
+fun PreloadLottie() {
+    rememberLottieComposition(
+        LottieCompositionSpec.RawRes(R.raw.splashanimation)
+    )
 }
 
 @Composable
