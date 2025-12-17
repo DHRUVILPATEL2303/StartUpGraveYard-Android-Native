@@ -7,6 +7,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.navigation
 import androidx.navigation.compose.rememberNavController
 import com.google.firebase.auth.FirebaseAuth
+import com.startup.graveyard.presentation.screens.loginscreen.LoginScreenUI
 import com.startup.graveyard.presentation.screens.signupscreen.SignUpScreenUI
 
 @Composable
@@ -20,12 +21,32 @@ fun AppNavigation(modifier: Modifier = Modifier,firebaseAuth: FirebaseAuth) {
     ){
         navigation<SubNavigation.AuthRoutes>(startDestination = Routes.SignUpScreen){
             composable<Routes.LoginScreen> {
+                LoginScreenUI(
+                    onNavigateToSignUp = {
+                        navController.navigate(Routes.SignUpScreen)
+                    }
+                )
 
             }
             composable<Routes.SignUpScreen> {
-                SignUpScreenUI(firebaseAuth = firebaseAuth)
+                SignUpScreenUI(firebaseAuth = firebaseAuth, onNavigateToLogin = {
+                    navController.navigate(Routes.LoginScreen)
+                }, onSignUpSuccess = {
+                    navController.navigate(SubNavigation.UserSelectionRoutes)
+                })
 
             }
         }
+
+        navigation<SubNavigation.UserSelectionRoutes>(startDestination = Routes.UserSelectionScreen){
+            composable<Routes.UserSelectionScreen> {
+                UserSelectionScreenUI()
+            }
+        }
     }
+}
+
+@Composable
+fun UserSelectionScreenUI() {
+    TODO("Not yet implemented")
 }

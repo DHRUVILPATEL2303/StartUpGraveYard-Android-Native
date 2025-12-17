@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "537876451964",
+    "project_id": "startupgraveyard",
+    "storage_bucket": "startupgraveyard.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:537876451964:android:66488081749404c4bfeff9",
+        "android_client_info": {
+          "package_name": "com.startup.graveyard"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCg2ODhWwq__tvyNSLK0hHjbBjgLBR9qo0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

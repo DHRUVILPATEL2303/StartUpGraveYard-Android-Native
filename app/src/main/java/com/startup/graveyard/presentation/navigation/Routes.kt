@@ -9,6 +9,9 @@ sealed class Routes {
 
     @Serializable
     object LoginScreen
+
+    @Serializable
+    object UserSelectionScreen
 }
 
 
@@ -20,5 +23,8 @@ sealed class SubNavigation {
 
     @Serializable
     object HomeRoutes
+
+    @Serializable
+    object UserSelectionRoutes
 
 }

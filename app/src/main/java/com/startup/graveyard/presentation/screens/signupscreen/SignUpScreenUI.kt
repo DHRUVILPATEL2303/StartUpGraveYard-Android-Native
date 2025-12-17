@@ -1,88 +1,459 @@
 package com.startup.graveyard.presentation.screens.signupscreen
 
-import android.graphics.Paint
-import android.widget.Button
-import android.widget.Space
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.height
-import androidx.compose.material.OutlinedTextField
-import androidx.compose.material.Text
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.*
+import androidx. compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose. foundation.verticalScroll
+import androidx.compose.material.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled. Email
+import androidx.compose.material.icons.filled.Lock
+import androidx.compose. material.icons.filled.Person
+import androidx.compose.material. icons.filled. Visibility
+import androidx.compose.material.icons. filled.VisibilityOff
 import androidx.compose.material3.Button
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
+import androidx. compose.material3.ButtonDefaults
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose. runtime.*
+import androidx. compose.ui. Alignment
+import androidx.compose.ui. Modifier
+import androidx. compose.ui.draw.clip
+import androidx.compose.ui.graphics. Brush
+import androidx. compose.ui.graphics.Color
+import androidx.compose.ui. res.painterResource
+import androidx.compose.ui. text.font.FontWeight
+import androidx. compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text. input.PasswordVisualTransformation
+import androidx. compose.ui.text.input. VisualTransformation
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx. compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.google.firebase.auth.FirebaseAuth
 import com.startup.graveyard.domain.models.CreateAccountModel
 import com.startup.graveyard.presentation.viewmodels.AuthViewModel
+import java.util.*
 
 @Composable
-fun SignUpScreenUI(modifier: Modifier = Modifier, authViewModel: AuthViewModel = hiltViewModel(),firebaseAuth: FirebaseAuth) {
-
+fun SignUpScreenUI(
+    modifier: Modifier = Modifier,
+    authViewModel: AuthViewModel = hiltViewModel(),
+    firebaseAuth: FirebaseAuth,
+    onNavigateToLogin:  () -> Unit = {},
+    onSignUpSuccess: () -> Unit = {}
+) {
+    // Form state
     val email = remember { mutableStateOf("") }
-    val password = remember {
-        mutableStateOf("")
-    }
-    val key= remember {
-        mutableStateOf(0)
+    val password = remember { mutableStateOf("") }
+    val confirmPassword = remember { mutableStateOf("") }
+    val fullName = remember { mutableStateOf("") }
+    val passwordVisible = remember { mutableStateOf(false) }
+    val confirmPasswordVisible = remember { mutableStateOf(false) }
+
+    // Validation states
+    val emailError = remember { mutableStateOf("") }
+    val passwordError = remember { mutableStateOf("") }
+    val confirmPasswordError = remember { mutableStateOf("") }
+    val nameError = remember { mutableStateOf("") }
+
+    // Auth state
+    val createAccountState by authViewModel.createAccountState.collectAsState()
+
+    // Colors for startup theme
+    val primaryColor = Color(0xFF6C5CE7)
+    val secondaryColor = Color(0xFFA29BFE)
+    val backgroundColor = Color(0xFF1E1E2E)
+    val surfaceColor = Color(0xFF2D2D42)
+    val textColor = Color.White
+    val errorColor = Color(0xFFFF6B6B)
+
+    // Handle auth state chdhanges
+    LaunchedEffect(createAccountState) {
+        if (createAccountState.data != null) {
+            onSignUpSuccess()
+        }
     }
 
-    LaunchedEffect(key) {
-        key.value++
-    }
     Box(
-        modifier = Modifier.fillMaxSize(),
-        contentAlignment = Alignment.Center
+        modifier = modifier
+            .fillMaxSize()
+            .background(
+                brush = Brush.verticalGradient(
+                    colors = listOf(backgroundColor, Color(0xFF181828))
+                )
+            )
     ) {
-        Column() {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .verticalScroll(rememberScrollState())
+                .padding(24.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Spacer(modifier = Modifier.height(40.dp))
 
+            // App Logo/Title Section
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                modifier = Modifier.padding(bottom = 40.dp)
+            ) {
+                // You can replace this with an actual logo
+                Box(
+                    modifier = Modifier
+                        .size(80.dp)
+                        .clip(RoundedCornerShape(16.dp))
+                        .background(
+                            brush = Brush.linearGradient(
+                                colors = listOf(primaryColor, secondaryColor)
+                            )
+                        ),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = "💀",
+                        fontSize = 32.sp,
+                        color = Color.White
+                    )
+                }
 
-            OutlinedTextField(
-                value = email.value,
-                onValueChange = {
-                    email.value = it
-                },
+                Spacer(modifier = Modifier.height(16.dp))
 
+                Text(
+                    text = "StartUp GraveYard",
+                    fontSize = 28.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = textColor,
+                    textAlign = TextAlign.Center
                 )
 
-            Spacer(modifier = Modifier.height(10.dp))
-
-            OutlinedTextField(
-                value = password.value,
-                onValueChange = {
-                    password.value = it
-                }
-            )
-
-
-            Button(
-                onClick = {
-
-                    authViewModel.createAccount(
-                        CreateAccountModel(
-                            email = email.value,
-                            password = password.value
-                        )
-                    )
-
-                    key.value++
-                }
-            ) {
-                Text("Create Accoutn")
+                Text(
+                    text = "Where ideas find new life",
+                    fontSize = 14.sp,
+                    color = textColor. copy(alpha = 0.7f),
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.padding(top = 4.dp)
+                )
             }
 
-            Text(text = firebaseAuth.currentUser?.email.toString())
+            // Sign Up Form Card
+            Card(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(16.dp)),
+                backgroundColor = surfaceColor,
+                elevation = 8.dp
+            ) {
+                Column(
+                    modifier = Modifier. padding(24.dp),
+                    horizontalAlignment = Alignment. CenterHorizontally
+                ) {
+                    Text(
+                        text = "Create Account",
+                        fontSize = 24.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = textColor,
+                        modifier = Modifier.padding(bottom = 24.dp)
+                    )
+
+                    // Full Name Field
+                    OutlinedTextField(
+                        value = fullName.value,
+                        onValueChange = {
+                            fullName.value = it
+                            nameError.value = ""
+                        },
+                        label = { Text("Full Name", color = textColor. copy(alpha = 0.7f)) },
+                        leadingIcon = {
+                            Icon(
+                                Icons.Default.Person,
+                                contentDescription = "Name",
+                                tint = primaryColor
+                            )
+                        },
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = TextFieldDefaults.outlinedTextFieldColors(
+                            textColor = textColor,
+                            cursorColor = primaryColor,
+                            focusedBorderColor = primaryColor,
+                            unfocusedBorderColor = textColor. copy(alpha = 0.3f),
+                            focusedLabelColor = primaryColor
+                        ),
+                        singleLine = true,
+                        isError = nameError. value.isNotEmpty()
+                    )
+
+                    if (nameError.value.isNotEmpty()) {
+                        Text(
+                            text = nameError.value,
+                            color = errorColor,
+                            fontSize = 12.sp,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(start = 8.dp, top = 4.dp)
+                        )
+                    }
+
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    // Email Field
+                    OutlinedTextField(
+                        value = email.value,
+                        onValueChange = {
+                            email.value = it
+                            emailError. value = ""
+                        },
+                        label = { Text("Email", color = textColor.copy(alpha = 0.7f)) },
+                        leadingIcon = {
+                            Icon(
+                                Icons.Default.Email,
+                                contentDescription = "Email",
+                                tint = primaryColor
+                            )
+                        },
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = TextFieldDefaults.outlinedTextFieldColors(
+                            textColor = textColor,
+                            cursorColor = primaryColor,
+                            focusedBorderColor = primaryColor,
+                            unfocusedBorderColor = textColor. copy(alpha = 0.3f),
+                            focusedLabelColor = primaryColor
+                        ),
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType. Email),
+                        singleLine = true,
+                        isError = emailError.value.isNotEmpty()
+                    )
+
+                    if (emailError. value.isNotEmpty()) {
+                        Text(
+                            text = emailError. value,
+                            color = errorColor,
+                            fontSize = 12.sp,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(start = 8.dp, top = 4.dp)
+                        )
+                    }
+
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    // Password Field
+                    OutlinedTextField(
+                        value = password.value,
+                        onValueChange = {
+                            password.value = it
+                            passwordError.value = ""
+                        },
+                        label = { Text("Password", color = textColor. copy(alpha = 0.7f)) },
+                        leadingIcon = {
+                            Icon(
+                                Icons.Default.Lock,
+                                contentDescription = "Password",
+                                tint = primaryColor
+                            )
+                        },
+                        trailingIcon = {
+                            IconButton(onClick = { passwordVisible.value = !passwordVisible. value }) {
+                                Icon(
+                                    if (passwordVisible.value) Icons.Default.Visibility
+                                    else Icons.Default.VisibilityOff,
+                                    contentDescription = if (passwordVisible.value) "Hide password" else "Show password",
+                                    tint = textColor. copy(alpha = 0.7f)
+                                )
+                            }
+                        },
+                        visualTransformation = if (passwordVisible.value) VisualTransformation.None
+                        else PasswordVisualTransformation(),
+                        modifier = Modifier. fillMaxWidth(),
+                        colors = TextFieldDefaults.outlinedTextFieldColors(
+                            textColor = textColor,
+                            cursorColor = primaryColor,
+                            focusedBorderColor = primaryColor,
+                            unfocusedBorderColor = textColor.copy(alpha = 0.3f),
+                            focusedLabelColor = primaryColor
+                        ),
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType. Password),
+                        singleLine = true,
+                        isError = passwordError. value.isNotEmpty()
+                    )
+
+                    if (passwordError.value.isNotEmpty()) {
+                        Text(
+                            text = passwordError.value,
+                            color = errorColor,
+                            fontSize = 12.sp,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                . padding(start = 8.dp, top = 4.dp)
+                        )
+                    }
+
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    // Confirm Password Field
+                    OutlinedTextField(
+                        value = confirmPassword.value,
+                        onValueChange = {
+                            confirmPassword.value = it
+                            confirmPasswordError.value = ""
+                        },
+                        label = { Text("Confirm Password", color = textColor.copy(alpha = 0.7f)) },
+                        leadingIcon = {
+                            Icon(
+                                Icons.Default.Lock,
+                                contentDescription = "Confirm Password",
+                                tint = primaryColor
+                            )
+                        },
+                        trailingIcon = {
+                            IconButton(onClick = { confirmPasswordVisible.value = !confirmPasswordVisible.value }) {
+                                Icon(
+                                    if (confirmPasswordVisible. value) Icons.Default.Visibility
+                                    else Icons. Default.VisibilityOff,
+                                    contentDescription = if (confirmPasswordVisible.value) "Hide password" else "Show password",
+                                    tint = textColor.copy(alpha = 0.7f)
+                                )
+                            }
+                        },
+                        visualTransformation = if (confirmPasswordVisible.value) VisualTransformation.None
+                        else PasswordVisualTransformation(),
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = TextFieldDefaults.outlinedTextFieldColors(
+                            textColor = textColor,
+                            cursorColor = primaryColor,
+                            focusedBorderColor = primaryColor,
+                            unfocusedBorderColor = textColor.copy(alpha = 0.3f),
+                            focusedLabelColor = primaryColor
+                        ),
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+                        singleLine = true,
+                        isError = confirmPasswordError.value.isNotEmpty()
+                    )
+
+                    if (confirmPasswordError.value.isNotEmpty()) {
+                        Text(
+                            text = confirmPasswordError.value,
+                            color = errorColor,
+                            fontSize = 12.sp,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(start = 8.dp, top = 4.dp)
+                        )
+                    }
+
+                    Spacer(modifier = Modifier.height(24.dp))
+
+                    // Error message from API
+                    if (createAccountState.error. isNotEmpty()) {
+                        Text(
+                            text = createAccountState.error,
+                            color = errorColor,
+                            fontSize = 14.sp,
+                            textAlign = TextAlign. Center,
+                            modifier = Modifier.padding(bottom = 16.dp)
+                        )
+                    }
+
+                    // Sign Up Button
+                    Button(
+                        onClick = {
+                            // Validate inputs
+                            var hasErrors = false
+
+                            if (fullName.value.trim().isEmpty()) {
+                                nameError.value = "Name is required"
+                                hasErrors = true
+                            }
+
+                            if (email.value.trim().isEmpty()) {
+                                emailError.value = "Email is required"
+                                hasErrors = true
+                            } else if (!android.util.Patterns.EMAIL_ADDRESS.matcher(email.value).matches()) {
+                                emailError. value = "Please enter a valid email"
+                                hasErrors = true
+                            }
+
+                            if (password.value.isEmpty()) {
+                                passwordError.value = "Password is required"
+                                hasErrors = true
+                            } else if (password.value.length < 6) {
+                                passwordError. value = "Password must be at least 6 characters"
+                                hasErrors = true
+                            }
+
+                            if (confirmPassword. value.isEmpty()) {
+                                confirmPasswordError.value = "Please confirm your password"
+                                hasErrors = true
+                            } else if (password. value != confirmPassword. value) {
+                                confirmPasswordError. value = "Passwords don't match"
+                                hasErrors = true
+                            }
+
+                            if (!hasErrors) {
+                                val createAccountModel = CreateAccountModel(
+                                    email = email.value.trim(),
+                                    password = password. value,
+                                    name = fullName.value.trim(),
+                                    profile_pic_url = "",
+                                    role = "user",
+                                    uuid = ""
+                                )
+                                authViewModel.createAccount(createAccountModel)
+                            }
+                        },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(56.dp),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = primaryColor,
+                            disabledContainerColor = primaryColor.copy(alpha = 0.5f)
+                        ),
+                        enabled = !createAccountState.isLoading,
+                        shape = RoundedCornerShape(12.dp)
+                    ) {
+                        if (createAccountState.isLoading) {
+                            CircularProgressIndicator(
+                                color = Color.White,
+                                modifier = Modifier.size(24.dp),
+                                strokeWidth = 2.dp
+                            )
+                        } else {
+                            Text(
+                                "Create Account",
+                                fontSize = 16.sp,
+                                fontWeight = FontWeight. SemiBold,
+                                color = Color.White
+                            )
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    // Login Link
+                    Row(
+                        horizontalArrangement = Arrangement.Center,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = "Already have an account?  ",
+                            color = textColor. copy(alpha = 0.7f),
+                            fontSize = 14.sp
+                        )
+                        TextButton(onClick = onNavigateToLogin) {
+                            Text(
+                                text = "Sign In",
+                                color = primaryColor,
+                                fontSize = 14.sp,
+                                fontWeight = FontWeight.SemiBold
+                            )
+                        }
+                    }
+                }
+            }
+
+            Spacer(modifier = Modifier.height(32.dp))
         }
-
-
-
     }
-
 }
