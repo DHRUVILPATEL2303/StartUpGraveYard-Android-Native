@@ -28,7 +28,6 @@ fun AppNavigation(
         startDestination = startDestination
     ) {
 
-        // ---------- AUTH GRAPH ----------
         navigation<SubNavigation.AuthRoutes>(
             startDestination = Routes.SignUpScreen
         ) {
@@ -60,7 +59,6 @@ fun AppNavigation(
             }
         }
 
-        // ---------- USER SELECTION ----------
         navigation<SubNavigation.UserSelectionRoutes>(
             startDestination = Routes.UserSelectionScreen
         ) {
@@ -80,7 +78,6 @@ fun AppNavigation(
             }
         }
 
-        // ---------- BUYER ----------
         navigation<SubNavigation.BuyerRoutes>(
             startDestination = Routes.BuyerHome
         ) {
@@ -92,7 +89,6 @@ fun AppNavigation(
             }
         }
 
-        // ---------- SELLER ----------
         navigation<SubNavigation.SellerRoutes>(
             startDestination = Routes.SellerDashboard
         ) {

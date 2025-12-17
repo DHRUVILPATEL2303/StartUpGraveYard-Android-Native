@@ -39,19 +39,15 @@ fun LoginScreenUI(
     onLoginSuccess: () -> Unit = {},
     onForgotPassword: () -> Unit = {}
 ) {
-    // Form state
     val email = remember { mutableStateOf("") }
     val password = remember { mutableStateOf("") }
     val passwordVisible = remember { mutableStateOf(false) }
 
-    // Validation states
     val emailError = remember { mutableStateOf("") }
     val passwordError = remember { mutableStateOf("") }
 
-    // Auth state
     val loginState by authViewModel.loginState.collectAsState()
 
-    // Colors for light theme
     val primaryColor = Color(0xFF6C5CE7)
     val secondaryColor = Color(0xFFA29BFE)
     val backgroundColor = Color(0xFFFFFFFF)
@@ -62,7 +58,6 @@ fun LoginScreenUI(
     val borderColor = Color(0xFFE0E0E0)
     val inputBackgroundColor = Color(0xFFF8F9FA)
 
-    // Handle auth state changes
     LaunchedEffect(loginState) {
         if (loginState.data != null) {
             onLoginSuccess()
@@ -83,12 +78,10 @@ fun LoginScreenUI(
         ) {
             Spacer(modifier = Modifier.height(60.dp))
 
-            // App Logo/Title Section
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 modifier = Modifier.padding(bottom = 40.dp)
             ) {
-                // Logo
                 Box(
                     modifier = Modifier
                         .size(100.dp)
@@ -126,20 +119,18 @@ fun LoginScreenUI(
                 )
             }
 
-            // Login Form Card
             Card(
                 modifier = Modifier
                     .fillMaxWidth()
                     .clip(RoundedCornerShape(24.dp)),
                 backgroundColor = surfaceColor,
-                elevation = 0.dp // Removed elevation for a cleaner flat look, or keep it low
+                elevation = 0.dp
             ) {
                 Column(
-                    modifier = Modifier.padding(horizontal = 4.dp), // Reduced padding as card is now blended
+                    modifier = Modifier.padding(horizontal = 4.dp),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     
-                    // Email Field
                     OutlinedTextField(
                         value = email.value,
                         onValueChange = {
@@ -186,7 +177,6 @@ fun LoginScreenUI(
 
                     Spacer(modifier = Modifier.height(16.dp))
 
-                    // Password Field
                     OutlinedTextField(
                         value = password.value,
                         onValueChange = {
@@ -243,7 +233,6 @@ fun LoginScreenUI(
                         )
                     }
 
-                    // Forgot Password Link
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -262,7 +251,6 @@ fun LoginScreenUI(
 
                     Spacer(modifier = Modifier.height(24.dp))
 
-                    // Error message from API
                     if (loginState.error.isNotEmpty()) {
                         Card(
                             modifier = Modifier
@@ -283,10 +271,8 @@ fun LoginScreenUI(
                         }
                     }
 
-                    // Login Button
                     Button(
                         onClick = {
-                            // Validate inputs
                             var hasErrors = false
 
                             if (email.value.trim().isEmpty()) {
@@ -353,7 +339,6 @@ fun LoginScreenUI(
 
                     Spacer(modifier = Modifier.height(32.dp))
 
-                    // Divider with "OR"
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         verticalAlignment = Alignment.CenterVertically
@@ -375,7 +360,6 @@ fun LoginScreenUI(
 
                     Spacer(modifier = Modifier.height(32.dp))
 
-                    // Sign Up Link
                     Row(
                         horizontalArrangement = Arrangement.Center,
                         verticalAlignment = Alignment.CenterVertically
@@ -399,11 +383,10 @@ fun LoginScreenUI(
 
             Spacer(modifier = Modifier.height(40.dp))
 
-            // Footer text
             Text(
                 text = "By signing in, you agree to our Terms of Service\nand Privacy Policy",
                 color = secondaryTextColor.copy(alpha = 0.7f),
-                fontSize = 12.sp,
+                fontSize = 16.sp,
                 textAlign = TextAlign.Center,
                 lineHeight = 16.sp
             )

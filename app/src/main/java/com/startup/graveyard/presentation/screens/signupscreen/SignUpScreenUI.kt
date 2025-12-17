@@ -45,7 +45,6 @@ fun SignUpScreenUI(
     onNavigateToLogin: () -> Unit = {},
     onSignUpSuccess: () -> Unit = {}
 ) {
-    // Form state
     val email = remember { mutableStateOf("") }
     val password = remember { mutableStateOf("") }
     val confirmPassword = remember { mutableStateOf("") }
@@ -53,16 +52,13 @@ fun SignUpScreenUI(
     val passwordVisible = remember { mutableStateOf(false) }
     val confirmPasswordVisible = remember { mutableStateOf(false) }
 
-    // Validation states
     val emailError = remember { mutableStateOf("") }
     val passwordError = remember { mutableStateOf("") }
     val confirmPasswordError = remember { mutableStateOf("") }
     val nameError = remember { mutableStateOf("") }
 
-    // Auth state
     val createAccountState by authViewModel.createAccountState.collectAsState()
 
-    // Colors for light theme
     val primaryColor = Color(0xFF6C5CE7)
     val secondaryColor = Color(0xFFA29BFE)
     val backgroundColor = Color(0xFFFFFFFF)
@@ -73,7 +69,6 @@ fun SignUpScreenUI(
     val borderColor = Color(0xFFE0E0E0)
     val inputBackgroundColor = Color(0xFFF8F9FA)
 
-    // Handle auth state changes
     LaunchedEffect(createAccountState) {
         if (createAccountState.data != null) {
             onSignUpSuccess()
@@ -94,12 +89,10 @@ fun SignUpScreenUI(
         ) {
             Spacer(modifier = Modifier.height(40.dp))
 
-            // App Logo/Title Section
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 modifier = Modifier.padding(bottom = 32.dp)
             ) {
-                // You can replace this with an actual logo
                 Box(
                     modifier = Modifier
                         .size(80.dp)
@@ -137,13 +130,12 @@ fun SignUpScreenUI(
                 )
             }
 
-            // Sign Up Form Card
             Card(
                 modifier = Modifier
                     .fillMaxWidth()
                     .clip(RoundedCornerShape(24.dp)),
                 backgroundColor = surfaceColor,
-                elevation = 0.dp // Flat look
+                elevation = 0.dp
             ) {
                 Column(
                     modifier = Modifier.padding(horizontal = 4.dp),
@@ -157,7 +149,6 @@ fun SignUpScreenUI(
                         modifier = Modifier.padding(bottom = 24.dp)
                     )
 
-                    // Full Name Field
                     OutlinedTextField(
                         value = fullName.value,
                         onValueChange = {
@@ -200,7 +191,6 @@ fun SignUpScreenUI(
 
                     Spacer(modifier = Modifier.height(16.dp))
 
-                    // Email Field
                     OutlinedTextField(
                         value = email.value,
                         onValueChange = {
@@ -244,7 +234,6 @@ fun SignUpScreenUI(
 
                     Spacer(modifier = Modifier.height(16.dp))
 
-                    // Password Field
                     OutlinedTextField(
                         value = password.value,
                         onValueChange = {
@@ -300,7 +289,6 @@ fun SignUpScreenUI(
 
                     Spacer(modifier = Modifier.height(16.dp))
 
-                    // Confirm Password Field
                     OutlinedTextField(
                         value = confirmPassword.value,
                         onValueChange = {
@@ -356,7 +344,6 @@ fun SignUpScreenUI(
 
                     Spacer(modifier = Modifier.height(32.dp))
 
-                    // Error message from API
                     if (createAccountState.error.isNotEmpty()) {
                         Card(
                             modifier = Modifier
@@ -377,10 +364,8 @@ fun SignUpScreenUI(
                         }
                     }
 
-                    // Sign Up Button
                     Button(
                         onClick = {
-                            // Validate inputs
                             var hasErrors = false
 
                             if (fullName.value.trim().isEmpty()) {
@@ -456,7 +441,6 @@ fun SignUpScreenUI(
 
                     Spacer(modifier = Modifier.height(24.dp))
 
-                    // Login Link
                     Row(
                         horizontalArrangement = Arrangement.Center,
                         verticalAlignment = Alignment.CenterVertically,
