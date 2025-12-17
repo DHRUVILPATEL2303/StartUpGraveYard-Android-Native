@@ -100,7 +100,7 @@ class AuthRepositoryImpl @Inject constructor(
         emit(ResultState.Loading)
 
         try {
-            val authResult = firebaseAuth.signInWithEmailLink(email, password).await()
+            val authResult = firebaseAuth.signInWithEmailAndPassword(email, password).await()
             if (authResult.user != null) {
                 emit(ResultState.Success(authResult.user!!))
             } else {

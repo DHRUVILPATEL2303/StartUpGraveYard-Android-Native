@@ -12,6 +12,20 @@ sealed class Routes {
 
     @Serializable
     object UserSelectionScreen
+
+
+    @Serializable
+    object BuyerHome
+
+    @Serializable
+    object SellerDashboard
+
+
+    @Serializable
+    object BuyerProductDetails
+
+    @Serializable
+    object SellerAddProduct
 }
 
 
@@ -26,5 +40,13 @@ sealed class SubNavigation {
 
     @Serializable
     object UserSelectionRoutes
+
+
+    @Serializable
+    object BuyerRoutes
+
+    @Serializable
+    object SellerRoutes
+
 
 }

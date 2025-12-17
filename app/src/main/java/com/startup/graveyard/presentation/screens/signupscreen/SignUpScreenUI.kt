@@ -3,34 +3,34 @@ package com.startup.graveyard.presentation.screens.signupscreen
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
-import androidx. compose.foundation.rememberScrollState
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose. foundation.verticalScroll
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled. Email
+import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Lock
-import androidx.compose. material.icons.filled.Person
-import androidx.compose.material. icons.filled. Visibility
-import androidx.compose.material.icons. filled.VisibilityOff
+import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.Visibility
+import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.Button
-import androidx. compose.material3.ButtonDefaults
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose. runtime.*
-import androidx. compose.ui. Alignment
-import androidx.compose.ui. Modifier
-import androidx. compose.ui.draw.clip
-import androidx.compose.ui.graphics. Brush
-import androidx. compose.ui.graphics.Color
-import androidx.compose.ui. res.painterResource
-import androidx.compose.ui. text.font.FontWeight
-import androidx. compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text. input.PasswordVisualTransformation
-import androidx. compose.ui.text.input. VisualTransformation
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx. compose.ui.unit.sp
+import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.google.firebase.auth.FirebaseAuth
 import com.startup.graveyard.domain.models.CreateAccountModel
@@ -42,7 +42,7 @@ fun SignUpScreenUI(
     modifier: Modifier = Modifier,
     authViewModel: AuthViewModel = hiltViewModel(),
     firebaseAuth: FirebaseAuth,
-    onNavigateToLogin:  () -> Unit = {},
+    onNavigateToLogin: () -> Unit = {},
     onSignUpSuccess: () -> Unit = {}
 ) {
     // Form state
@@ -62,15 +62,18 @@ fun SignUpScreenUI(
     // Auth state
     val createAccountState by authViewModel.createAccountState.collectAsState()
 
-    // Colors for startup theme
+    // Colors for light theme
     val primaryColor = Color(0xFF6C5CE7)
     val secondaryColor = Color(0xFFA29BFE)
-    val backgroundColor = Color(0xFF1E1E2E)
-    val surfaceColor = Color(0xFF2D2D42)
-    val textColor = Color.White
+    val backgroundColor = Color(0xFFFFFFFF)
+    val surfaceColor = Color(0xFFFFFFFF)
+    val textColor = Color(0xFF2D2D2D)
+    val secondaryTextColor = Color(0xFF757575)
     val errorColor = Color(0xFFFF6B6B)
+    val borderColor = Color(0xFFE0E0E0)
+    val inputBackgroundColor = Color(0xFFF8F9FA)
 
-    // Handle auth state chdhanges
+    // Handle auth state changes
     LaunchedEffect(createAccountState) {
         if (createAccountState.data != null) {
             onSignUpSuccess()
@@ -80,11 +83,7 @@ fun SignUpScreenUI(
     Box(
         modifier = modifier
             .fillMaxSize()
-            .background(
-                brush = Brush.verticalGradient(
-                    colors = listOf(backgroundColor, Color(0xFF181828))
-                )
-            )
+            .background(backgroundColor)
     ) {
         Column(
             modifier = Modifier
@@ -98,7 +97,7 @@ fun SignUpScreenUI(
             // App Logo/Title Section
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
-                modifier = Modifier.padding(bottom = 40.dp)
+                modifier = Modifier.padding(bottom = 32.dp)
             ) {
                 // You can replace this with an actual logo
                 Box(
@@ -132,7 +131,7 @@ fun SignUpScreenUI(
                 Text(
                     text = "Where ideas find new life",
                     fontSize = 14.sp,
-                    color = textColor. copy(alpha = 0.7f),
+                    color = secondaryTextColor,
                     textAlign = TextAlign.Center,
                     modifier = Modifier.padding(top = 4.dp)
                 )
@@ -142,13 +141,13 @@ fun SignUpScreenUI(
             Card(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .clip(RoundedCornerShape(16.dp)),
+                    .clip(RoundedCornerShape(24.dp)),
                 backgroundColor = surfaceColor,
-                elevation = 8.dp
+                elevation = 0.dp // Flat look
             ) {
                 Column(
-                    modifier = Modifier. padding(24.dp),
-                    horizontalAlignment = Alignment. CenterHorizontally
+                    modifier = Modifier.padding(horizontal = 4.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     Text(
                         text = "Create Account",
@@ -165,7 +164,7 @@ fun SignUpScreenUI(
                             fullName.value = it
                             nameError.value = ""
                         },
-                        label = { Text("Full Name", color = textColor. copy(alpha = 0.7f)) },
+                        label = { Text("Full Name", color = secondaryTextColor) },
                         leadingIcon = {
                             Icon(
                                 Icons.Default.Person,
@@ -178,11 +177,14 @@ fun SignUpScreenUI(
                             textColor = textColor,
                             cursorColor = primaryColor,
                             focusedBorderColor = primaryColor,
-                            unfocusedBorderColor = textColor. copy(alpha = 0.3f),
-                            focusedLabelColor = primaryColor
+                            unfocusedBorderColor = borderColor,
+                            focusedLabelColor = primaryColor,
+                            backgroundColor = inputBackgroundColor,
+                            unfocusedLabelColor = secondaryTextColor
                         ),
                         singleLine = true,
-                        isError = nameError. value.isNotEmpty()
+                        isError = nameError.value.isNotEmpty(),
+                        shape = RoundedCornerShape(16.dp)
                     )
 
                     if (nameError.value.isNotEmpty()) {
@@ -203,9 +205,9 @@ fun SignUpScreenUI(
                         value = email.value,
                         onValueChange = {
                             email.value = it
-                            emailError. value = ""
+                            emailError.value = ""
                         },
-                        label = { Text("Email", color = textColor.copy(alpha = 0.7f)) },
+                        label = { Text("Email", color = secondaryTextColor) },
                         leadingIcon = {
                             Icon(
                                 Icons.Default.Email,
@@ -218,17 +220,20 @@ fun SignUpScreenUI(
                             textColor = textColor,
                             cursorColor = primaryColor,
                             focusedBorderColor = primaryColor,
-                            unfocusedBorderColor = textColor. copy(alpha = 0.3f),
-                            focusedLabelColor = primaryColor
+                            unfocusedBorderColor = borderColor,
+                            focusedLabelColor = primaryColor,
+                            backgroundColor = inputBackgroundColor,
+                            unfocusedLabelColor = secondaryTextColor
                         ),
-                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType. Email),
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
                         singleLine = true,
-                        isError = emailError.value.isNotEmpty()
+                        isError = emailError.value.isNotEmpty(),
+                        shape = RoundedCornerShape(16.dp)
                     )
 
-                    if (emailError. value.isNotEmpty()) {
+                    if (emailError.value.isNotEmpty()) {
                         Text(
-                            text = emailError. value,
+                            text = emailError.value,
                             color = errorColor,
                             fontSize = 12.sp,
                             modifier = Modifier
@@ -246,7 +251,7 @@ fun SignUpScreenUI(
                             password.value = it
                             passwordError.value = ""
                         },
-                        label = { Text("Password", color = textColor. copy(alpha = 0.7f)) },
+                        label = { Text("Password", color = secondaryTextColor) },
                         leadingIcon = {
                             Icon(
                                 Icons.Default.Lock,
@@ -255,28 +260,31 @@ fun SignUpScreenUI(
                             )
                         },
                         trailingIcon = {
-                            IconButton(onClick = { passwordVisible.value = !passwordVisible. value }) {
+                            IconButton(onClick = { passwordVisible.value = !passwordVisible.value }) {
                                 Icon(
                                     if (passwordVisible.value) Icons.Default.Visibility
                                     else Icons.Default.VisibilityOff,
                                     contentDescription = if (passwordVisible.value) "Hide password" else "Show password",
-                                    tint = textColor. copy(alpha = 0.7f)
+                                    tint = secondaryTextColor
                                 )
                             }
                         },
                         visualTransformation = if (passwordVisible.value) VisualTransformation.None
                         else PasswordVisualTransformation(),
-                        modifier = Modifier. fillMaxWidth(),
+                        modifier = Modifier.fillMaxWidth(),
                         colors = TextFieldDefaults.outlinedTextFieldColors(
                             textColor = textColor,
                             cursorColor = primaryColor,
                             focusedBorderColor = primaryColor,
-                            unfocusedBorderColor = textColor.copy(alpha = 0.3f),
-                            focusedLabelColor = primaryColor
+                            unfocusedBorderColor = borderColor,
+                            focusedLabelColor = primaryColor,
+                            backgroundColor = inputBackgroundColor,
+                            unfocusedLabelColor = secondaryTextColor
                         ),
-                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType. Password),
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
                         singleLine = true,
-                        isError = passwordError. value.isNotEmpty()
+                        isError = passwordError.value.isNotEmpty(),
+                        shape = RoundedCornerShape(16.dp)
                     )
 
                     if (passwordError.value.isNotEmpty()) {
@@ -286,7 +294,7 @@ fun SignUpScreenUI(
                             fontSize = 12.sp,
                             modifier = Modifier
                                 .fillMaxWidth()
-                                . padding(start = 8.dp, top = 4.dp)
+                                .padding(start = 8.dp, top = 4.dp)
                         )
                     }
 
@@ -299,7 +307,7 @@ fun SignUpScreenUI(
                             confirmPassword.value = it
                             confirmPasswordError.value = ""
                         },
-                        label = { Text("Confirm Password", color = textColor.copy(alpha = 0.7f)) },
+                        label = { Text("Confirm Password", color = secondaryTextColor) },
                         leadingIcon = {
                             Icon(
                                 Icons.Default.Lock,
@@ -310,10 +318,10 @@ fun SignUpScreenUI(
                         trailingIcon = {
                             IconButton(onClick = { confirmPasswordVisible.value = !confirmPasswordVisible.value }) {
                                 Icon(
-                                    if (confirmPasswordVisible. value) Icons.Default.Visibility
-                                    else Icons. Default.VisibilityOff,
+                                    if (confirmPasswordVisible.value) Icons.Default.Visibility
+                                    else Icons.Default.VisibilityOff,
                                     contentDescription = if (confirmPasswordVisible.value) "Hide password" else "Show password",
-                                    tint = textColor.copy(alpha = 0.7f)
+                                    tint = secondaryTextColor
                                 )
                             }
                         },
@@ -324,12 +332,15 @@ fun SignUpScreenUI(
                             textColor = textColor,
                             cursorColor = primaryColor,
                             focusedBorderColor = primaryColor,
-                            unfocusedBorderColor = textColor.copy(alpha = 0.3f),
-                            focusedLabelColor = primaryColor
+                            unfocusedBorderColor = borderColor,
+                            focusedLabelColor = primaryColor,
+                            backgroundColor = inputBackgroundColor,
+                            unfocusedLabelColor = secondaryTextColor
                         ),
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
                         singleLine = true,
-                        isError = confirmPasswordError.value.isNotEmpty()
+                        isError = confirmPasswordError.value.isNotEmpty(),
+                        shape = RoundedCornerShape(16.dp)
                     )
 
                     if (confirmPasswordError.value.isNotEmpty()) {
@@ -343,17 +354,27 @@ fun SignUpScreenUI(
                         )
                     }
 
-                    Spacer(modifier = Modifier.height(24.dp))
+                    Spacer(modifier = Modifier.height(32.dp))
 
                     // Error message from API
-                    if (createAccountState.error. isNotEmpty()) {
-                        Text(
-                            text = createAccountState.error,
-                            color = errorColor,
-                            fontSize = 14.sp,
-                            textAlign = TextAlign. Center,
-                            modifier = Modifier.padding(bottom = 16.dp)
-                        )
+                    if (createAccountState.error.isNotEmpty()) {
+                        Card(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(bottom = 16.dp),
+                            backgroundColor = errorColor.copy(alpha = 0.1f),
+                            shape = RoundedCornerShape(12.dp),
+                            border = androidx.compose.foundation.BorderStroke(1.dp, errorColor.copy(alpha = 0.3f)),
+                            elevation = 0.dp
+                        ) {
+                            Text(
+                                text = createAccountState.error,
+                                color = errorColor,
+                                fontSize = 14.sp,
+                                textAlign = TextAlign.Center,
+                                modifier = Modifier.padding(12.dp)
+                            )
+                        }
                     }
 
                     // Sign Up Button
@@ -371,7 +392,7 @@ fun SignUpScreenUI(
                                 emailError.value = "Email is required"
                                 hasErrors = true
                             } else if (!android.util.Patterns.EMAIL_ADDRESS.matcher(email.value).matches()) {
-                                emailError. value = "Please enter a valid email"
+                                emailError.value = "Please enter a valid email"
                                 hasErrors = true
                             }
 
@@ -379,25 +400,25 @@ fun SignUpScreenUI(
                                 passwordError.value = "Password is required"
                                 hasErrors = true
                             } else if (password.value.length < 6) {
-                                passwordError. value = "Password must be at least 6 characters"
+                                passwordError.value = "Password must be at least 6 characters"
                                 hasErrors = true
                             }
 
-                            if (confirmPassword. value.isEmpty()) {
+                            if (confirmPassword.value.isEmpty()) {
                                 confirmPasswordError.value = "Please confirm your password"
                                 hasErrors = true
-                            } else if (password. value != confirmPassword. value) {
-                                confirmPasswordError. value = "Passwords don't match"
+                            } else if (password.value != confirmPassword.value) {
+                                confirmPasswordError.value = "Passwords don't match"
                                 hasErrors = true
                             }
 
                             if (!hasErrors) {
                                 val createAccountModel = CreateAccountModel(
                                     email = email.value.trim(),
-                                    password = password. value,
+                                    password = password.value,
                                     name = fullName.value.trim(),
                                     profile_pic_url = "",
-                                    role = "user",
+                                    role = "buyer",
                                     uuid = ""
                                 )
                                 authViewModel.createAccount(createAccountModel)
@@ -411,7 +432,11 @@ fun SignUpScreenUI(
                             disabledContainerColor = primaryColor.copy(alpha = 0.5f)
                         ),
                         enabled = !createAccountState.isLoading,
-                        shape = RoundedCornerShape(12.dp)
+                        shape = RoundedCornerShape(16.dp),
+                        elevation = ButtonDefaults.buttonElevation(
+                            defaultElevation = 8.dp,
+                            pressedElevation = 2.dp
+                        )
                     ) {
                         if (createAccountState.isLoading) {
                             CircularProgressIndicator(
@@ -423,22 +448,23 @@ fun SignUpScreenUI(
                             Text(
                                 "Create Account",
                                 fontSize = 16.sp,
-                                fontWeight = FontWeight. SemiBold,
+                                fontWeight = FontWeight.SemiBold,
                                 color = Color.White
                             )
                         }
                     }
 
-                    Spacer(modifier = Modifier.height(16.dp))
+                    Spacer(modifier = Modifier.height(24.dp))
 
                     // Login Link
                     Row(
                         horizontalArrangement = Arrangement.Center,
-                        verticalAlignment = Alignment.CenterVertically
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier.padding(bottom = 16.dp)
                     ) {
                         Text(
                             text = "Already have an account?  ",
-                            color = textColor. copy(alpha = 0.7f),
+                            color = secondaryTextColor,
                             fontSize = 14.sp
                         )
                         TextButton(onClick = onNavigateToLogin) {

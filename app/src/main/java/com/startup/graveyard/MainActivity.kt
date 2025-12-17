@@ -13,6 +13,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import com.google.firebase.auth.FirebaseAuth
 import com.startup.graveyard.presentation.navigation.AppNavigation
+import com.startup.graveyard.presentation.navigation.SubNavigation
 import com.startup.graveyard.ui.theme.StartUpGraveYardTheme
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -21,11 +22,22 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
-        val firebaseAuth= FirebaseAuth.getInstance()
+
+        val firebaseAuth = FirebaseAuth.getInstance()
+
+        val startDestination = if (firebaseAuth.currentUser == null) {
+            SubNavigation.AuthRoutes
+        } else {
+            SubNavigation.UserSelectionRoutes
+        }
+
         setContent {
             StartUpGraveYardTheme {
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    AppNavigation(firebaseAuth =firebaseAuth)
+                Scaffold(modifier = Modifier.fillMaxSize()) {innerPaddding->
+                    AppNavigation(
+                        firebaseAuth = firebaseAuth,
+                        startDestination = startDestination
+                    )
                 }
             }
         }
