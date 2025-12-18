@@ -2,8 +2,12 @@ package com.startup.graveyard.data.remote
 
 import com.startup.graveyard.domain.models.CreateAccountModel
 import com.startup.graveyard.domain.models.CreatedAccountResponseModel
+import com.startup.graveyard.domain.models.SendOTPReqeustResponseModel
+import com.startup.graveyard.domain.models.SendOTPRequestModel
 import com.startup.graveyard.domain.models.UpdateUserAccountRequestModel
 import com.startup.graveyard.domain.models.UserAccountResponseModel
+import com.startup.graveyard.domain.models.VerifyOTPRequestModel
+import com.startup.graveyard.domain.models.VerifyOTPResponseModel
 import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.GET
@@ -30,6 +34,19 @@ interface AuthApi {
        @Path("id") id : String,
        @Body updateUserAccountRequestModel: UpdateUserAccountRequestModel
    ): Response<UserAccountResponseModel>
+
+
+   @POST("/getOTP")
+   suspend fun sendOtpRequest(
+       @Body sendOTPRequestModel: SendOTPRequestModel
+   ): Response<SendOTPReqeustResponseModel>
+
+
+   @POST("/verifyOTP")
+   suspend fun verifyOTP(
+       @Body verifyOTPRequestModel: VerifyOTPRequestModel
+): Response<VerifyOTPResponseModel>
+
 
 
 }

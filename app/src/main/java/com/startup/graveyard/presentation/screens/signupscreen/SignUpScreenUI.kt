@@ -411,7 +411,7 @@ fun SignUpScreenUI(
                                     email = email.value.trim(),
                                     password = password.value,
                                     name = fullName.value.trim(),
-                                    profile_pic_url = "",
+                                    profile_pic_url = "hello.png",
                                     role = "buyer",
                                     uuid = ""
                                 )

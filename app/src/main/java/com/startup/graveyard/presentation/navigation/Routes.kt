@@ -32,6 +32,11 @@ sealed class Routes {
 
     @Serializable
     object AccountScreen
+
+    @Serializable
+    object VerificationScreen
+
+
 }
 
 

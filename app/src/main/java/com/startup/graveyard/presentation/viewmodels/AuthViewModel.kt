@@ -10,12 +10,17 @@ import com.google.firebase.auth.FirebaseUser
 import com.startup.graveyard.common.ResultState
 import com.startup.graveyard.domain.models.CreateAccountModel
 import com.startup.graveyard.domain.models.CreatedAccountResponseModel
+import com.startup.graveyard.domain.models.SendOTPReqeustResponseModel
 import com.startup.graveyard.domain.models.UpdateUserAccountRequestModel
 import com.startup.graveyard.domain.models.UserAccountResponseModel
+import com.startup.graveyard.domain.models.VerifyOTPRequestModel
+import com.startup.graveyard.domain.models.VerifyOTPResponseModel
 import com.startup.graveyard.domain.usecase.authusecases.CreateAccountUseCase
 import com.startup.graveyard.domain.usecase.authusecases.GetUserAccountDetailsUseCase
 import com.startup.graveyard.domain.usecase.authusecases.LoginUserUseCase
+import com.startup.graveyard.domain.usecase.authusecases.SendOTPVerrificationRequestUseCase
 import com.startup.graveyard.domain.usecase.authusecases.UpdateUserAccountUseCase
+import com.startup.graveyard.domain.usecase.authusecases.VerifyOTPUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -31,7 +36,9 @@ class AuthViewModel @Inject constructor(
     private val loginUserUseCase: LoginUserUseCase,
     private val getUserAccountDetailsUseCase: GetUserAccountDetailsUseCase,
     private val updateUserAccountUseCase: UpdateUserAccountUseCase,
-    private val firebaseAuth: FirebaseAuth
+    private val firebaseAuth: FirebaseAuth,
+    private val sendOTPVerrificationRequestUseCase: SendOTPVerrificationRequestUseCase,
+    private val verifyOTPUseCase: VerifyOTPUseCase
 ) : ViewModel() {
 
     private val _createAccountState = MutableStateFlow(AuthState<CreatedAccountResponseModel>())
@@ -50,6 +57,73 @@ class AuthViewModel @Inject constructor(
     val updateAccountState = _updateAccountState.asStateFlow()
 
 
+    private val _sendOtpForVerificationState =
+        MutableStateFlow(AuthState<SendOTPReqeustResponseModel>())
+    val sendOtpVerificationState = _sendOtpForVerificationState.asStateFlow()
+
+
+    private val _verifyOtpState = MutableStateFlow(AuthState<VerifyOTPResponseModel>())
+    val verifyOtpState = _verifyOtpState.asStateFlow()
+
+
+    fun verifyOtp(
+        verifyOTPRequestModel: VerifyOTPRequestModel
+    ) {
+        viewModelScope.launch(Dispatchers.IO) {
+            verifyOTPUseCase.verifyOtp(verifyOTPRequestModel).collect {
+                when (it) {
+
+                    is ResultState.Error -> {
+
+                        _verifyOtpState.value = AuthState(isLoading = false, error = it.error)
+
+                    }
+
+                    is ResultState.Loading -> {
+
+                        _verifyOtpState.value = AuthState(isLoading = true)
+
+
+                    }
+
+                    is ResultState.Success -> {
+                        _verifyOtpState.value = AuthState(isLoading = false, data = it.data)
+
+
+                    }
+                }
+            }
+        }
+    }
+
+
+    fun sendOtpForVerificationRequest() {
+        viewModelScope.launch(Dispatchers.IO) {
+            sendOTPVerrificationRequestUseCase.sendOtpVerificationRequestUseCase().collect {
+
+
+                when (it) {
+                    is ResultState.Error -> {
+                        _sendOtpForVerificationState.value =
+                            AuthState(isLoading = false, error = it.error)
+
+                    }
+
+                    is ResultState.Success -> {
+                        _sendOtpForVerificationState.value =
+                            AuthState(isLoading = false, data = it.data)
+                    }
+
+                    is ResultState.Loading -> {
+                        _sendOtpForVerificationState.value = AuthState(isLoading = true)
+                    }
+                }
+            }
+
+        }
+
+    }
+
     fun clearAllState() {
         _createAccountState.value = AuthState()
         _loginState.value = AuthState()
@@ -57,7 +131,7 @@ class AuthViewModel @Inject constructor(
         _updateAccountState.value = AuthState()
     }
 
-    fun logOut(){
+    fun logOut() {
         firebaseAuth.signOut()
         clearAllState()
     }

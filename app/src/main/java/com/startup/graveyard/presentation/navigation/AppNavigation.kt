@@ -38,6 +38,7 @@ import com.startup.graveyard.presentation.screens.loginscreen.LoginScreenUI
 import com.startup.graveyard.presentation.screens.signupscreen.SignUpScreenUI
 import com.startup.graveyard.presentation.screens.splashscreen.SplashScreenUI
 import com.startup.graveyard.presentation.screens.userselectionscreen.UserSelectionScreenUI
+import com.startup.graveyard.presentation.screens.verificationscreen.EmailVerificationScreenUI
 import com.startup.graveyard.presentation.viewmodels.AuthViewModel
 import com.startup.graveyard.presentation.viewmodels.SplashViewModel
 import kotlinx.coroutines.delay
@@ -51,8 +52,8 @@ fun AppNavigation(
 ) {
     val navController = rememberNavController()
 
-    if (firebaseAuth.currentUser!=null){
-        LaunchedEffect(Unit ) {
+    if (firebaseAuth.currentUser != null) {
+        LaunchedEffect(Unit) {
             authViewModel.getUserAccountDetails()
         }
     }
@@ -133,14 +134,20 @@ fun AppNavigation(
                             popUpTo(SubNavigation.UserSelectionRoutes) { inclusive = true }
                         }
                     },
-                    navController=navController
+                    navController = navController
                 )
             }
 
+            composable<Routes.VerificationScreen> {
+                EmailVerificationScreenUI(
+                    navController = navController,
+                    firebaseAuth = firebaseAuth
+                )
+            }
 
             composable<Routes.AccountScreen> {
                 AccountScreenUI(
-                    navController=navController
+                    navController = navController
                 )
             }
         }
@@ -171,8 +178,10 @@ fun AppNavigation(
 
 @Composable
 fun SellerAddProductScreen() {
-    Box(modifier = Modifier.fillMaxSize(),
-        contentAlignment = Alignment.Center){
+    Box(
+        modifier = Modifier.fillMaxSize(),
+        contentAlignment = Alignment.Center
+    ) {
         Text("Seller Add Product")
     }
 }
@@ -180,28 +189,33 @@ fun SellerAddProductScreen() {
 @Composable
 fun SellerDashboardScreen() {
 
-    Box(modifier = Modifier.fillMaxSize(),
-        contentAlignment = Alignment.Center){
+    Box(
+        modifier = Modifier.fillMaxSize(),
+        contentAlignment = Alignment.Center
+    ) {
         Text("Seller Dashboard")
     }
 }
 
 @Composable
-fun BuyerProductDetailsScreen(){
+fun BuyerProductDetailsScreen() {
 
-    Box(modifier = Modifier.fillMaxSize(),
-        contentAlignment = Alignment.Center){
+    Box(
+        modifier = Modifier.fillMaxSize(),
+        contentAlignment = Alignment.Center
+    ) {
         Text("Buyer Product Detaisl")
     }
 }
 
 
-
 @Composable
 fun BuyerHomeScreen() {
 
-    Box(modifier = Modifier.fillMaxSize(),
-        contentAlignment = Alignment.Center){
+    Box(
+        modifier = Modifier.fillMaxSize(),
+        contentAlignment = Alignment.Center
+    ) {
         Text("Buyer Home Screen")
     }
 }

@@ -14,5 +14,23 @@ data class Data(
     val name: String,
     val profile_pic_url: String,
     val role: String,
-    val uuid: String
+    val uuid: String,
 )
+
+/*
+{
+  "created_at": "string",
+  "data": {
+    "created_at": "string",
+    "email": "string",
+    "id": 0,
+    "name": "string",
+    "profile_pic_url": "string",
+    "role": "string",
+    "uuid": "string",
+    "verified_at": "string"
+  },
+  "message": "string",
+  "success": true
+}
+* */

@@ -19,6 +19,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -26,6 +27,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.layout.ModifierLocalBeyondBoundsLayout
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -131,6 +133,20 @@ fun UserSelectionScreenUI(
                 textColor = colorScheme.onSecondaryContainer,
                 arrowTint = colorScheme.onSurfaceVariant
             )
+
+            Spacer(modifier = Modifier.height(30.dp))
+
+            Card(
+                modifier = Modifier.size(40.dp)
+            ) {
+                TextButton(onClick = {
+                    navController.navigate(Routes.VerificationScreen)
+                }) {
+                    Text(text = "Verify Account")
+                }
+
+            }
+
         }
     }
 }

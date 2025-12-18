@@ -9,8 +9,12 @@ import com.startup.graveyard.common.ResultState
 import com.startup.graveyard.data.remote.AuthApi
 import com.startup.graveyard.domain.models.CreateAccountModel
 import com.startup.graveyard.domain.models.CreatedAccountResponseModel
+import com.startup.graveyard.domain.models.SendOTPReqeustResponseModel
+import com.startup.graveyard.domain.models.SendOTPRequestModel
 import com.startup.graveyard.domain.models.UpdateUserAccountRequestModel
 import com.startup.graveyard.domain.models.UserAccountResponseModel
+import com.startup.graveyard.domain.models.VerifyOTPRequestModel
+import com.startup.graveyard.domain.models.VerifyOTPResponseModel
 import com.startup.graveyard.domain.repo.authrepo.AuthRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
@@ -148,6 +152,47 @@ class AuthRepositoryImpl @Inject constructor(
                     emit(ResultState.Error("Something Went Wrong"))
                 }
 
+            } catch (e: Exception) {
+                emit(ResultState.Error(e.message.toString()))
+            }
+        }
+
+    override suspend fun sendOtpRequest(): Flow<ResultState<SendOTPReqeustResponseModel>> = flow {
+
+        emit(ResultState.Loading)
+
+        try {
+            val email = firebaseAuth.currentUser?.email ?: ""
+            val emailRequestModel = SendOTPRequestModel(
+                email=email
+            )
+            Log.d("TAG", "sendOtpRequest: $email")
+            val response = authApi.sendOtpRequest(emailRequestModel)
+            if (response.isSuccessful && response.body() != null) {
+                emit(ResultState.Success(response.body()!!))
+            } else {
+                emit(ResultState.Error("Something Went Wrong Try Again"))
+            }
+        } catch (e: Exception) {
+            emit(ResultState.Error(e.message.toString()))
+        }
+    }
+
+    override suspend fun verifyOTP(verifyOTPRequestModel: VerifyOTPRequestModel): Flow<ResultState<VerifyOTPResponseModel>> =
+        flow {
+
+            emit(ResultState.Loading)
+
+
+            try {
+                val email = firebaseAuth.currentUser?.email ?: ""
+                verifyOTPRequestModel.email = email
+                val response = authApi.verifyOTP(verifyOTPRequestModel)
+                if (response.isSuccessful && response.body() != null) {
+                    emit(ResultState.Success(response.body()!!))
+                } else {
+                    emit(ResultState.Error("Something Went Wrong Try Again After Sometime"))
+                }
             } catch (e: Exception) {
                 emit(ResultState.Error(e.message.toString()))
             }
