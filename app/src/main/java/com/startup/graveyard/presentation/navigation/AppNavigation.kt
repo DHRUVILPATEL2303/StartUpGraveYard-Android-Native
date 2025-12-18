@@ -161,6 +161,8 @@ fun AppNavigation(
             composable<Routes.BuyerProductDetails> {
                 BuyerProductDetailsScreen()
             }
+
+
         }
 
         navigation<SubNavigation.SellerRoutes>(

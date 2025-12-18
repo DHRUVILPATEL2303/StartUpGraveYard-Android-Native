@@ -1,14 +1,23 @@
+@file:OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
+
 package com.startup.graveyard.presentation.screens.verificationscreen
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBackIos
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.LoadingIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
@@ -23,9 +32,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
@@ -33,7 +42,6 @@ import com.google.firebase.auth.FirebaseAuth
 import com.startup.graveyard.domain.models.VerifyOTPRequestModel
 import com.startup.graveyard.presentation.viewmodels.AuthViewModel
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun EmailVerificationScreenUI(
     authViewModel: AuthViewModel = hiltViewModel(),
@@ -48,10 +56,7 @@ fun EmailVerificationScreenUI(
 
     val otp = remember { mutableStateOf("") }
     val otpError = remember { mutableStateOf("") }
-
-    LaunchedEffect(Unit) {
-        authViewModel.sendOtpForVerificationRequest()
-    }
+    val otpLength = 6
 
     LaunchedEffect(verifyOtpState.data) {
         if (verifyOtpState.data != null) {
@@ -59,7 +64,29 @@ fun EmailVerificationScreenUI(
         }
     }
 
+    val isGlobalLoading = sendOtpState.isLoading || verifyOtpState.isLoading
+
     Scaffold(
+        topBar = {
+            CenterAlignedTopAppBar(
+                title = {
+                    Text(
+                        text = "Account Verification",
+                        style = typography.titleMedium.copy(fontWeight = FontWeight.SemiBold),
+                        color = colorScheme.onSurface
+                    )
+                },
+                navigationIcon = {
+                    IconButton(onClick = { navController.popBackStack() }) {
+                        Icon(
+                            imageVector = Icons.Default.ArrowBackIos,
+                            contentDescription = "back",
+                            tint = colorScheme.onSurface
+                        )
+                    }
+                }
+            )
+        },
         containerColor = colorScheme.background
     ) { padding ->
         Box(
@@ -73,7 +100,7 @@ fun EmailVerificationScreenUI(
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 colors = CardDefaults.cardColors(containerColor = colorScheme.surface),
-                elevation = CardDefaults.cardElevation(defaultElevation = 6.dp),
+                elevation = CardDefaults.cardElevation(defaultElevation = 8.dp),
                 shape = CardDefaults.shape
             ) {
                 Column(
@@ -94,7 +121,7 @@ fun EmailVerificationScreenUI(
                     Spacer(modifier = Modifier.height(8.dp))
 
                     Text(
-                        text = "Enter the verification code sent to your email.",
+                        text = "Enter the verification code we sent to your email.",
                         style = typography.bodyMedium.copy(color = colorScheme.onSurfaceVariant),
                         textAlign = TextAlign.Center
                     )
@@ -104,14 +131,14 @@ fun EmailVerificationScreenUI(
                     OutlinedTextField(
                         value = otp.value,
                         onValueChange = {
-                            val digits = it.filter(Char::isDigit).take(6)
+                            val digits = it.filter(Char::isDigit).take(otpLength)
                             otp.value = digits
                             otpError.value = ""
                         },
                         label = { Text("6-digit code") },
                         singleLine = true,
                         visualTransformation = VisualTransformation.None,
-                        keyboardOptions = KeyboardOptions.Default,
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.NumberPassword),
                         isError = otpError.value.isNotEmpty(),
                         modifier = Modifier.fillMaxWidth()
                     )
@@ -147,19 +174,26 @@ fun EmailVerificationScreenUI(
                         )
                     }
 
-                    Spacer(modifier = Modifier.height(20.dp))
+                    if (sendOtpState.data != null) {
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Text(
+                            text = "Verification code sent.",
+                            style = typography.bodySmall.copy(color = colorScheme.primary)
+                        )
+                    }
+
+                    Spacer(modifier = Modifier.height(24.dp))
 
                     Button(
                         onClick = {
-                            if (otp.value.length < 6) {
+                            if (otp.value.length < otpLength) {
                                 otpError.value = "Enter the 6-digit code"
                             } else {
-                                if (firebaseAuth.currentUser != null) {
-
+                                firebaseAuth.currentUser?.email?.let { email ->
                                     authViewModel.verifyOtp(
                                         VerifyOTPRequestModel(
                                             code = otp.value,
-                                            email = firebaseAuth.currentUser!!.email.toString()
+                                            email = email
                                         )
                                     )
                                 }
@@ -177,8 +211,8 @@ fun EmailVerificationScreenUI(
                         if (verifyOtpState.isLoading) {
                             CircularProgressIndicator(
                                 color = colorScheme.onPrimary,
-                                modifier = Modifier.size(20.dp),
-                                strokeWidth = 2.dp
+                                modifier = Modifier.size(32.dp),
+                                strokeWidth = 4.dp
                             )
                         } else {
                             Text(
@@ -198,10 +232,15 @@ fun EmailVerificationScreenUI(
                         enabled = !sendOtpState.isLoading
                     ) {
                         if (sendOtpState.isLoading) {
-                            CircularProgressIndicator(
+//                            CircularProgressIndicator(
+//                                color = colorScheme.primary,
+//                                modifier = Modifier.size(28.dp),
+//                                strokeWidth = 3.dp
+//                            )
+                            LoadingIndicator(
                                 color = colorScheme.primary,
-                                modifier = Modifier.size(18.dp),
-                                strokeWidth = 2.dp
+                                modifier = Modifier.size(83.dp),
+
                             )
                         } else {
                             Text(
@@ -210,16 +249,10 @@ fun EmailVerificationScreenUI(
                             )
                         }
                     }
-
-                    if (sendOtpState.data != null) {
-                        Spacer(modifier = Modifier.height(8.dp))
-                        Text(
-                            text = "Verification code sent.",
-                            style = typography.bodySmall.copy(color = colorScheme.primary)
-                        )
-                    }
                 }
             }
+
+
         }
     }
 }

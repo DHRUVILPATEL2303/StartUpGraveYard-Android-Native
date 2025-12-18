@@ -96,6 +96,7 @@ dependencies {
     implementation("androidx.core:core-splashscreen:1.2.0")
 
 
+    implementation("androidx.compose.material3:material3-android:1.5.0-alpha04")
 
     implementation("com.google.accompanist:accompanist-pager:0.36.0")
     implementation("com.google.accompanist:accompanist-pager-indicators:0.36.0")
