@@ -137,7 +137,7 @@ fun UserSelectionScreenUI(
             Spacer(modifier = Modifier.height(30.dp))
 
             Card(
-                modifier = Modifier.size(40.dp)
+
             ) {
                 TextButton(onClick = {
                     navController.navigate(Routes.VerificationScreen)

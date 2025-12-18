@@ -2,6 +2,7 @@ package com.startup.graveyard.data.remote
 
 import com.startup.graveyard.domain.models.CreateAccountModel
 import com.startup.graveyard.domain.models.CreatedAccountResponseModel
+import com.startup.graveyard.domain.models.DeleteAccountResponseModel
 import com.startup.graveyard.domain.models.SendOTPReqeustResponseModel
 import com.startup.graveyard.domain.models.SendOTPRequestModel
 import com.startup.graveyard.domain.models.UpdateUserAccountRequestModel
@@ -10,6 +11,7 @@ import com.startup.graveyard.domain.models.VerifyOTPRequestModel
 import com.startup.graveyard.domain.models.VerifyOTPResponseModel
 import retrofit2.Response
 import retrofit2.http.Body
+import retrofit2.http.DELETE
 import retrofit2.http.GET
 import retrofit2.http.POST
 import retrofit2.http.PUT
@@ -47,6 +49,11 @@ interface AuthApi {
        @Body verifyOTPRequestModel: VerifyOTPRequestModel
 ): Response<VerifyOTPResponseModel>
 
+
+   @DELETE("/users/{id}")
+   suspend fun deleteUserAccount(
+       @Path("id") uuid  : String
+   ): Response<DeleteAccountResponseModel>
 
 
 }

@@ -9,6 +9,7 @@ import com.startup.graveyard.common.ResultState
 import com.startup.graveyard.data.remote.AuthApi
 import com.startup.graveyard.domain.models.CreateAccountModel
 import com.startup.graveyard.domain.models.CreatedAccountResponseModel
+import com.startup.graveyard.domain.models.DeleteAccountResponseModel
 import com.startup.graveyard.domain.models.SendOTPReqeustResponseModel
 import com.startup.graveyard.domain.models.SendOTPRequestModel
 import com.startup.graveyard.domain.models.UpdateUserAccountRequestModel
@@ -164,7 +165,7 @@ class AuthRepositoryImpl @Inject constructor(
         try {
             val email = firebaseAuth.currentUser?.email ?: ""
             val emailRequestModel = SendOTPRequestModel(
-                email=email
+                email = email
             )
             Log.d("TAG", "sendOtpRequest: $email")
             val response = authApi.sendOtpRequest(emailRequestModel)
@@ -197,4 +198,36 @@ class AuthRepositoryImpl @Inject constructor(
                 emit(ResultState.Error(e.message.toString()))
             }
         }
+
+    override suspend fun deleteUserAccount(): Flow<ResultState<DeleteAccountResponseModel>> = flow {
+        emit(ResultState.Loading)
+
+        try {
+            val firebaseUser = firebaseAuth.currentUser
+            val uuid = firebaseUser?.uid
+
+            if (firebaseUser == null || uuid == null) {
+                emit(ResultState.Error("User not authenticated"))
+                return@flow
+            }
+
+            val response = authApi.deleteUserAccount(uuid)
+            Log.d("DELETE-ACCOUNT RESPONSE",response.toString())
+
+            if (response.isSuccessful && response.body() != null) {
+
+                firebaseUser.delete().await()
+
+                firebaseAuth.signOut()
+
+                emit(ResultState.Success(response.body()!!))
+
+            } else {
+                emit(ResultState.Error("Account deletion failed on server"))
+            }
+
+        } catch (e: Exception) {
+            emit(ResultState.Error(e.message ?: "Failed to delete account"))
+        }
+    }
 }

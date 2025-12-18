@@ -4,6 +4,7 @@ import com.google.firebase.auth.FirebaseUser
 import com.startup.graveyard.common.ResultState
 import com.startup.graveyard.domain.models.CreateAccountModel
 import com.startup.graveyard.domain.models.CreatedAccountResponseModel
+import com.startup.graveyard.domain.models.DeleteAccountResponseModel
 import com.startup.graveyard.domain.models.SendOTPReqeustResponseModel
 import com.startup.graveyard.domain.models.UpdateUserAccountRequestModel
 import com.startup.graveyard.domain.models.UserAccountResponseModel
@@ -31,4 +32,8 @@ interface AuthRepository {
     suspend fun verifyOTP(
         verifyOTPRequestModel: VerifyOTPRequestModel
     ): Flow<ResultState<VerifyOTPResponseModel>>
+
+    suspend fun deleteUserAccount(
+
+    ): Flow<ResultState<DeleteAccountResponseModel>>
 }
