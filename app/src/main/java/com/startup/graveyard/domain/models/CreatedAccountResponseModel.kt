@@ -15,6 +15,7 @@ data class Data(
     val profile_pic_url: String,
     val role: String,
     val uuid: String,
+    val verified_at : String
 )
 
 /*

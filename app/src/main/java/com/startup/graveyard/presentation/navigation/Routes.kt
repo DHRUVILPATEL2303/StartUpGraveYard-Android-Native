@@ -1,5 +1,12 @@
 package com.startup.graveyard.presentation.navigation
 
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Dashboard
+import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.ShoppingCart
+import androidx.compose.ui.graphics.vector.ImageVector
 import kotlinx.serialization.Serializable
 
 sealed class Routes {
@@ -40,8 +47,24 @@ sealed class Routes {
 }
 
 
+sealed class BuyerBottomNav(
+    val route: Any,
+    val title: String,
+    val icon: ImageVector
+) {
+    object Home : BuyerBottomNav(Routes.BuyerHome, "Home", Icons.Default.Home)
+    object Cart : BuyerBottomNav(Routes.BuyerProductDetails, "Cart", Icons.Default.ShoppingCart)
+}
 
 
+sealed class SellerBottomNav(
+    val route: Any,
+    val title: String,
+    val icon: ImageVector
+) {
+    object Dashboard : SellerBottomNav(Routes.SellerDashboard, "Dashboard", Icons.Default.Dashboard)
+    object AddProduct : SellerBottomNav(Routes.SellerAddProduct, "Add", Icons.Default.Add)
+}
 
 sealed class SubNavigation {
 
