@@ -6,6 +6,7 @@ import androidx.core.view.WindowInsetsCompat
 import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseAuth
 import com.startup.graveyard.common.BASE_URL
+import com.startup.graveyard.data.remote.AssetApi
 import com.startup.graveyard.data.remote.AuthApi
 import dagger.Module
 import dagger.Provides
@@ -24,7 +25,7 @@ object DataModule {
 
     @Provides
     @Singleton
-    fun provideRetrofit() : Retrofit {
+    fun provideRetrofit(): Retrofit {
         return Retrofit.Builder()
             .baseUrl(BASE_URL)
             .addConverterFactory(GsonConverterFactory.create())
@@ -39,14 +40,20 @@ object DataModule {
 
     @Provides
     @Singleton
-    fun provideContext(@ApplicationContext context: Context) : Context {
+    fun provideContext(@ApplicationContext context: Context): Context {
         return context
     }
 
     @Provides
     @Singleton
-    fun provideAuthApi() : AuthApi {
+    fun provideAuthApi(): AuthApi {
         return provideRetrofit().create(AuthApi::class.java)
+    }
+
+    @Provides
+    @Singleton
+    fun provideAssetApi(): AssetApi {
+        return provideRetrofit().create<AssetApi>(AssetApi::class.java)
     }
 
 }

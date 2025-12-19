@@ -38,6 +38,7 @@ import androidx.compose.material.icons.filled.Dashboard
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.material.icons.filled.SwapHoriz
+import androidx.compose.material.icons.filled.SwipeLeftAlt
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -561,7 +562,6 @@ fun RowScope.ModernBottomBarItem(
     val haptic = LocalHapticFeedback.current
     val interactionSource = remember { MutableInteractionSource() }
 
-    // Animations
     val animatedConfig = spring<Float>(
         dampingRatio = Spring.DampingRatioLowBouncy,
         stiffness = Spring.StiffnessLow
@@ -582,13 +582,7 @@ fun RowScope.ModernBottomBarItem(
         modifier = Modifier
             .weight(1f)
             .fillMaxHeight()
-            .clickable(
-                interactionSource = interactionSource,
-                indication = null
-            ) {
-                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                onClick()
-            },
+          ,
         contentAlignment = Alignment.Center
     ) {
         Column(
@@ -618,7 +612,15 @@ fun RowScope.ModernBottomBarItem(
                     imageVector = icon,
                     contentDescription = label,
                     tint = if (isActionItem && !selected) Color(0xFFFF5252) else iconColor,
-                    modifier = Modifier.size(24.dp)
+                    modifier = Modifier.size(24.dp).clickable(
+                            interactionSource = interactionSource,
+                    indication = null
+                ) {
+                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                    onClick()
+
+
+                    }
                 )
             }
 
@@ -698,7 +700,9 @@ fun BuyerBottomBar(navController: NavController) {
             label = "Cart",
             selected = destination?.hasRoute<Routes.BuyerProductDetails>() == true,
             onClick = {
-                navController.navigate(Routes.BuyerProductDetails)
+                navController.navigate(Routes.BuyerProductDetails){
+                    launchSingleTop = true
+                }
             }
         )
     }
@@ -825,7 +829,7 @@ fun SplitFloatingBottomBar(
         ) {
             Box(
                 modifier = Modifier
-                    .size(56.dp)
+                    .size(66.dp)
                     .shadow(
                         elevation = 16.dp,
                         shape = CircleShape,
@@ -837,10 +841,10 @@ fun SplitFloatingBottomBar(
                 contentAlignment = Alignment.Center
             ) {
                 Icon(
-                    imageVector = Icons.Default.SwapHoriz,
+                    imageVector = Icons.Default.SwipeLeftAlt,
                     contentDescription = "Switch Role",
-                    tint = Color(0xFFFF5252),
-                    modifier = Modifier.size(24.dp)
+                    tint = Color(0xFFFF6E40),
+                    modifier = Modifier.size(34.dp)
                 )
             }
 
