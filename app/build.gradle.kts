@@ -91,6 +91,7 @@ dependencies {
 
     implementation("com.squareup.okhttp3:okhttp:5.3.2")
     implementation("com.airbnb.android:lottie-compose:6.7.1")
+    implementation("com.google.accompanist:accompanist-navigation-animation:0.36.0")
 
     implementation("com.airbnb.android:lottie-compose:6.7.1")
     implementation("androidx.core:core-splashscreen:1.2.0")

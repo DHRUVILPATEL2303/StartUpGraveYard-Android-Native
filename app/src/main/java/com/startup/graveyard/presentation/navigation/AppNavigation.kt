@@ -1,12 +1,17 @@
 package com.startup.graveyard.presentation.navigation
 
+import androidx.compose.animation.AnimatedContentTransitionScope
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
+import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -120,7 +125,20 @@ fun AppNavigation(
             modifier = Modifier.padding(bottom = 0.dp)
         ) {
 
-            composable<Routes.Splash> {
+            composable<Routes.Splash>(
+                enterTransition = {
+                    slideInVertically(
+                        initialOffsetY = { fullHeight -> fullHeight },
+                        animationSpec = tween(700, easing = FastOutSlowInEasing)
+                    )
+                },
+                exitTransition = {
+                    slideOutVertically(
+                        targetOffsetY = { fullHeight -> -fullHeight },
+                        animationSpec = tween(600, easing = FastOutSlowInEasing)
+                    )
+                }
+            ) {
                 val isAnimationDone by splashViewModel.isAnimationDone.collectAsState()
 
                 LaunchedEffect(isAnimationDone) {
@@ -147,7 +165,32 @@ fun AppNavigation(
             navigation<SubNavigation.AuthRoutes>(
                 startDestination = Routes.SignUpScreen
             ) {
-                composable<Routes.LoginScreen> {
+                composable<Routes.LoginScreen>(
+                    enterTransition = {
+                        slideIntoContainer(
+                            AnimatedContentTransitionScope.SlideDirection.Left,
+                            animationSpec = tween(400)
+                        )
+                    },
+                    exitTransition = {
+                        slideOutOfContainer(
+                            AnimatedContentTransitionScope.SlideDirection.Left,
+                            animationSpec = tween(400)
+                        )
+                    },
+                    popEnterTransition = {
+                        slideIntoContainer(
+                            AnimatedContentTransitionScope.SlideDirection.Right,
+                            animationSpec = tween(400)
+                        )
+                    },
+                    popExitTransition = {
+                        slideOutOfContainer(
+                            AnimatedContentTransitionScope.SlideDirection.Right,
+                            animationSpec = tween(400)
+                        )
+                    }
+                ) {
                     LoginScreenUI(
                         onNavigateToSignUp = {
                             navController.navigate(Routes.SignUpScreen)
@@ -160,7 +203,32 @@ fun AppNavigation(
                     )
                 }
 
-                composable<Routes.SignUpScreen> {
+                composable<Routes.SignUpScreen>(
+                    enterTransition = {
+                        slideIntoContainer(
+                            AnimatedContentTransitionScope.SlideDirection.Left,
+                            animationSpec = tween(400)
+                        )
+                    },
+                    exitTransition = {
+                        slideOutOfContainer(
+                            AnimatedContentTransitionScope.SlideDirection.Left,
+                            animationSpec = tween(400)
+                        )
+                    },
+                    popEnterTransition = {
+                        slideIntoContainer(
+                            AnimatedContentTransitionScope.SlideDirection.Right,
+                            animationSpec = tween(400)
+                        )
+                    },
+                    popExitTransition = {
+                        slideOutOfContainer(
+                            AnimatedContentTransitionScope.SlideDirection.Right,
+                            animationSpec = tween(400)
+                        )
+                    }
+                ) {
                     SignUpScreenUI(
                         firebaseAuth = firebaseAuth,
                         onNavigateToLogin = {
@@ -178,7 +246,14 @@ fun AppNavigation(
             navigation<SubNavigation.UserSelectionRoutes>(
                 startDestination = Routes.UserSelectionScreen
             ) {
-                composable<Routes.UserSelectionScreen> {
+                composable<Routes.UserSelectionScreen>(
+                    enterTransition = {
+                        fadeIn(animationSpec = tween(400))
+                    },
+                    exitTransition = {
+                        fadeOut(animationSpec = tween(400))
+                    }
+                ) {
                     UserSelectionScreenUI(
                         onBuyerSelected = {
                             navController.navigate(SubNavigation.BuyerRoutes) {
@@ -194,14 +269,64 @@ fun AppNavigation(
                     )
                 }
 
-                composable<Routes.VerificationScreen> {
+                composable<Routes.VerificationScreen>(
+                    enterTransition = {
+                        slideIntoContainer(
+                            AnimatedContentTransitionScope.SlideDirection.Left,
+                            animationSpec = tween(400)
+                        )
+                    },
+                    exitTransition = {
+                        slideOutOfContainer(
+                            AnimatedContentTransitionScope.SlideDirection.Left,
+                            animationSpec = tween(400)
+                        )
+                    },
+                    popEnterTransition = {
+                        slideIntoContainer(
+                            AnimatedContentTransitionScope.SlideDirection.Right,
+                            animationSpec = tween(400)
+                        )
+                    },
+                    popExitTransition = {
+                        slideOutOfContainer(
+                            AnimatedContentTransitionScope.SlideDirection.Right,
+                            animationSpec = tween(400)
+                        )
+                    }
+                ) {
                     EmailVerificationScreenUI(
                         navController = navController,
                         firebaseAuth = firebaseAuth
                     )
                 }
 
-                composable<Routes.AccountScreen> {
+                composable<Routes.AccountScreen>(
+                    enterTransition = {
+                        slideIntoContainer(
+                            AnimatedContentTransitionScope.SlideDirection.Up,
+                            animationSpec = tween(400)
+                        )
+                    },
+                    exitTransition = {
+                        slideOutOfContainer(
+                            AnimatedContentTransitionScope.SlideDirection.Down,
+                            animationSpec = tween(400)
+                        )
+                    },
+                    popEnterTransition = {
+                        slideIntoContainer(
+                            AnimatedContentTransitionScope.SlideDirection.Up,
+                            animationSpec = tween(400)
+                        )
+                    },
+                    popExitTransition = {
+                        slideOutOfContainer(
+                            AnimatedContentTransitionScope.SlideDirection.Down,
+                            animationSpec = tween(400)
+                        )
+                    }
+                ) {
                     AccountScreenUI(
                         navController = navController
                     )
@@ -209,23 +334,103 @@ fun AppNavigation(
             }
 
             navigation<SubNavigation.BuyerRoutes>(
-                startDestination = Routes.BuyerHome
+                startDestination = Routes.BuyerHome,
+                enterTransition = {
+                    slideInVertically(
+                        initialOffsetY = { fullHeight -> fullHeight },
+                        animationSpec = tween(700, easing = FastOutSlowInEasing)
+                    )
+                },
+                exitTransition = {
+                    slideOutVertically(
+                        targetOffsetY = { fullHeight -> -fullHeight },
+                        animationSpec = tween(600, easing = FastOutSlowInEasing)
+                    )
+                }
             ) {
-                composable<Routes.BuyerHome> {
+                composable<Routes.BuyerHome>(
+                    enterTransition = { fadeIn(tween(400)) },
+                    exitTransition = { fadeOut(tween(400)) }
+                ) {
                     BuyerHomeScreen()
                 }
-                composable<Routes.BuyerProductDetails> {
+                composable<Routes.BuyerProductDetails>(
+                    enterTransition = {
+                        slideIntoContainer(
+                            AnimatedContentTransitionScope.SlideDirection.Left,
+                            animationSpec = tween(400)
+                        )
+                    },
+                    exitTransition = {
+                        slideOutOfContainer(
+                            AnimatedContentTransitionScope.SlideDirection.Left,
+                            animationSpec = tween(400)
+                        )
+                    },
+                    popEnterTransition = {
+                        slideIntoContainer(
+                            AnimatedContentTransitionScope.SlideDirection.Right,
+                            animationSpec = tween(400)
+                        )
+                    },
+                    popExitTransition = {
+                        slideOutOfContainer(
+                            AnimatedContentTransitionScope.SlideDirection.Right,
+                            animationSpec = tween(400)
+                        )
+                    }
+                ) {
                     BuyerProductDetailsScreen()
                 }
             }
 
             navigation<SubNavigation.SellerRoutes>(
-                startDestination = Routes.SellerDashboard
+                startDestination = Routes.SellerDashboard,
+                enterTransition = {
+                    slideInVertically(
+                        initialOffsetY = { fullHeight -> fullHeight },
+                        animationSpec = tween(700, easing = FastOutSlowInEasing)
+                    )
+                },
+                exitTransition = {
+                    slideOutVertically(
+                        targetOffsetY = { fullHeight -> -fullHeight },
+                        animationSpec = tween(600, easing = FastOutSlowInEasing)
+                    )
+                }
             ) {
-                composable<Routes.SellerDashboard> {
+                composable<Routes.SellerDashboard>(
+                    enterTransition = { fadeIn(tween(400)) },
+                    exitTransition = { fadeOut(tween(400)) }
+                ) {
                     SellerDashboardScreen()
                 }
-                composable<Routes.SellerAddProduct> {
+                composable<Routes.SellerAddProduct>(
+                    enterTransition = {
+                        slideIntoContainer(
+                            AnimatedContentTransitionScope.SlideDirection.Up,
+                            animationSpec = tween(400)
+                        )
+                    },
+                    exitTransition = {
+                        slideOutOfContainer(
+                            AnimatedContentTransitionScope.SlideDirection.Down,
+                            animationSpec = tween(400)
+                        )
+                    },
+                    popEnterTransition = {
+                        slideIntoContainer(
+                            AnimatedContentTransitionScope.SlideDirection.Up,
+                            animationSpec = tween(400)
+                        )
+                    },
+                    popExitTransition = {
+                        slideOutOfContainer(
+                            AnimatedContentTransitionScope.SlideDirection.Down,
+                            animationSpec = tween(400)
+                        )
+                    }
+                ) {
                     SellerAddProductScreen()
                 }
             }
