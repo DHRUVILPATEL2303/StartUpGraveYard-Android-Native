@@ -107,7 +107,8 @@ fun AppNavigation(
     modifier: Modifier = Modifier,
     firebaseAuth: FirebaseAuth,
     splashViewModel: SplashViewModel = hiltViewModel(),
-    authViewModel: AuthViewModel = hiltViewModel<AuthViewModel>()
+    authViewModel: AuthViewModel = hiltViewModel<AuthViewModel>(),
+    assetViewModel: AssetViewModel = hiltViewModel<AssetViewModel>()
 ) {
     val navController = rememberNavController()
 
@@ -383,23 +384,17 @@ fun AppNavigation(
                     )
                 }
             ) {
-                @Composable
-                fun getBuyerGraphViewModel(entry: NavBackStackEntry): AssetViewModel {
-                    val parentEntry = remember(entry) {
-                        navController.getBackStackEntry<SubNavigation.BuyerRoutes>()
-                    }
-                    return hiltViewModel<AssetViewModel>(parentEntry)
-                }
+
 
                 composable<Routes.BuyerHome>(
                     enterTransition = { fadeIn(tween(400)) },
                     exitTransition = { fadeOut(tween(400)) }
                 ) { backStackEntry ->
 
-                    val viewModel = getBuyerGraphViewModel(backStackEntry)
+
 
                     BuyerHomeScreenUI(
-                        assetViewModel = viewModel,
+                        assetViewModel = assetViewModel,
                     )
                 }
 
