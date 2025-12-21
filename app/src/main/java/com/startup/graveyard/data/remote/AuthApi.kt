@@ -1,14 +1,18 @@
 package com.startup.graveyard.data.remote
 
+import com.startup.graveyard.domain.models.CheckVerificationStatusRequestModel
 import com.startup.graveyard.domain.models.CreateAccountModel
 import com.startup.graveyard.domain.models.CreatedAccountResponseModel
 import com.startup.graveyard.domain.models.DeleteAccountResponseModel
+import com.startup.graveyard.domain.models.LoginUserRequestModel
+import com.startup.graveyard.domain.models.LoginUserResponseModel
 import com.startup.graveyard.domain.models.SendOTPReqeustResponseModel
 import com.startup.graveyard.domain.models.SendOTPRequestModel
 import com.startup.graveyard.domain.models.UpdateUserAccountRequestModel
 import com.startup.graveyard.domain.models.UserAccountResponseModel
 import com.startup.graveyard.domain.models.VerifyOTPRequestModel
 import com.startup.graveyard.domain.models.VerifyOTPResponseModel
+import kotlinx.coroutines.flow.Flow
 import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.DELETE
@@ -54,6 +58,17 @@ interface AuthApi {
    suspend fun deleteUserAccount(
        @Path("id") uuid  : String
    ): Response<DeleteAccountResponseModel>
+
+
+   @POST("/users/checkVerification")
+   suspend fun checkVerificationStatsu(
+        @Body checkVerificationStatusRequestModel: CheckVerificationStatusRequestModel
+   ): Response<Boolean>
+
+   @POST("/users/login")
+   suspend fun doLogin(
+       @Body loginUserRequestModel: LoginUserRequestModel
+   ): Response<LoginUserResponseModel>
 
 
 }

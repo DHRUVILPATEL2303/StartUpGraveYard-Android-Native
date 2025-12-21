@@ -7,9 +7,12 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.startup.graveyard.common.ResultState
 import com.startup.graveyard.data.remote.AuthApi
+import com.startup.graveyard.domain.models.CheckVerificationStatusRequestModel
 import com.startup.graveyard.domain.models.CreateAccountModel
 import com.startup.graveyard.domain.models.CreatedAccountResponseModel
 import com.startup.graveyard.domain.models.DeleteAccountResponseModel
+import com.startup.graveyard.domain.models.LoginUserRequestModel
+import com.startup.graveyard.domain.models.LoginUserResponseModel
 import com.startup.graveyard.domain.models.SendOTPReqeustResponseModel
 import com.startup.graveyard.domain.models.SendOTPRequestModel
 import com.startup.graveyard.domain.models.UpdateUserAccountRequestModel
@@ -20,6 +23,8 @@ import com.startup.graveyard.domain.repo.authrepo.AuthRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.tasks.await
+import java.util.concurrent.ExecutionException
+import java.util.concurrent.Executor
 import javax.inject.Inject
 
 class AuthRepositoryImpl @Inject constructor(
@@ -106,7 +111,19 @@ class AuthRepositoryImpl @Inject constructor(
         try {
             val authResult = firebaseAuth.signInWithEmailAndPassword(email, password).await()
             if (authResult.user != null) {
-                emit(ResultState.Success(authResult.user!!))
+
+                val response = authApi.doLogin(
+                    loginUserRequestModel = LoginUserRequestModel(
+                        email = email,
+                        password = password
+                    )
+                )
+                if (response.isSuccessful && response.body() != null) {
+                    emit(ResultState.Success(authResult.user!!))
+
+                } else {
+                    emit(ResultState.Error("Something Went Wrong Try Again "))
+                }
             } else {
                 emit(ResultState.Error("Something Went Wrong Try Again After Sometime!!!"))
             }
@@ -212,7 +229,7 @@ class AuthRepositoryImpl @Inject constructor(
             }
 
             val response = authApi.deleteUserAccount(uuid)
-            Log.d("DELETE-ACCOUNT RESPONSE",response.toString())
+            Log.d("DELETE-ACCOUNT RESPONSE", response.toString())
 
             if (response.isSuccessful && response.body() != null) {
 
@@ -230,4 +247,24 @@ class AuthRepositoryImpl @Inject constructor(
             emit(ResultState.Error(e.message ?: "Failed to delete account"))
         }
     }
+
+    override suspend fun checkVerificationStatus(): Flow<ResultState<Boolean>> = flow {
+        emit(ResultState.Loading)
+
+        try {
+            val email = firebaseAuth.currentUser?.email ?: ""
+            val response = authApi.checkVerificationStatsu(
+                checkVerificationStatusRequestModel = CheckVerificationStatusRequestModel(email)
+            )
+            if (response.isSuccessful && response.body() != null) {
+                emit(ResultState.Success(response.body()!!))
+            } else {
+                emit(ResultState.Error("Something Went Wrong"))
+            }
+        } catch (e: Exception) {
+            emit(ResultState.Error(e.message.toString()))
+        }
+    }
+
+
 }

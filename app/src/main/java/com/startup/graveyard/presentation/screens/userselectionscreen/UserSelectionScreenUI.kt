@@ -37,6 +37,14 @@ import androidx.navigation.NavController
 import com.startup.graveyard.presentation.navigation.Routes
 import com.startup.graveyard.presentation.viewmodels.AuthViewModel
 
+
+
+
+import androidx.compose.material.icons.filled.*
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+
+
 @Composable
 fun UserSelectionScreenUI(
     onBuyerSelected: () -> Unit,
@@ -44,12 +52,18 @@ fun UserSelectionScreenUI(
     navController: NavController,
     authViewModel: AuthViewModel = hiltViewModel()
 ) {
-    val accountState = authViewModel.accountState.collectAsState()
+    val accountState by authViewModel.accountState.collectAsState()
+    val verificationState by authViewModel.checkVerificationState.collectAsState()
+
+    val isVerified = verificationState.data == true
+    var showVerifyDialog by remember { mutableStateOf(false) }
+
     val colorScheme = MaterialTheme.colorScheme
     val typography = MaterialTheme.typography
 
     LaunchedEffect(Unit) {
         authViewModel.getUserAccountDetails()
+        authViewModel.checkVerification()
     }
 
     Scaffold(
@@ -62,22 +76,35 @@ fun UserSelectionScreenUI(
                             style = typography.titleMedium.copy(fontWeight = FontWeight.SemiBold),
                             color = colorScheme.onSurface
                         )
+
                         Spacer(modifier = Modifier.width(8.dp))
+
                         Text(
-                            text = accountState.value.data?.data?.name.orEmpty(),
+                            text = accountState.data?.data?.name.orEmpty(),
                             style = typography.titleMedium.copy(fontWeight = FontWeight.ExtraBold),
                             color = colorScheme.primary
                         )
+
+                        if (isVerified) {
+                            Spacer(modifier = Modifier.width(6.dp))
+                            Icon(
+                                imageVector = Icons.Default.Verified,
+                                contentDescription = "Verified",
+                                tint = Color(0xFF1E88E5),
+                                modifier = Modifier.size(20.dp)
+                            )
+                        }
                     }
                 },
                 navigationIcon = {
                     Icon(
                         imageVector = Icons.Default.AccountCircle,
-                        contentDescription = null,
-                        tint = colorScheme.onSurface,
+                        contentDescription = "Account",
                         modifier = Modifier
                             .padding(start = 16.dp)
-                            .clickable { navController.navigate(Routes.AccountScreen) }
+                            .clickable {
+                                navController.navigate(Routes.AccountScreen)
+                            }
                     )
                 }
             )
@@ -91,14 +118,12 @@ fun UserSelectionScreenUI(
                 .padding(horizontal = 24.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
+
             Spacer(modifier = Modifier.height(32.dp))
 
             Text(
                 text = "Choose how you want to continue",
-                style = typography.headlineSmall.copy(
-                    fontWeight = FontWeight.Bold,
-                    color = colorScheme.onBackground
-                ),
+                style = typography.headlineSmall.copy(fontWeight = FontWeight.Bold),
                 textAlign = TextAlign.Center
             )
 
@@ -116,10 +141,16 @@ fun UserSelectionScreenUI(
                 icon = Icons.Default.ShoppingCart,
                 title = "Buyer",
                 containerColor = colorScheme.primaryContainer,
-                onClick = onBuyerSelected,
                 iconTint = colorScheme.onPrimaryContainer,
                 textColor = colorScheme.onPrimaryContainer,
-                arrowTint = colorScheme.onSurfaceVariant
+                arrowTint = colorScheme.onSurfaceVariant,
+                onClick = {
+                    if (isVerified) {
+                        onBuyerSelected()
+                    } else {
+                        showVerifyDialog = true
+                    }
+                }
             )
 
             Spacer(modifier = Modifier.height(20.dp))
@@ -128,26 +159,40 @@ fun UserSelectionScreenUI(
                 icon = Icons.Default.Store,
                 title = "Seller",
                 containerColor = colorScheme.secondaryContainer,
-                onClick = onSellerSelected,
                 iconTint = colorScheme.onSecondaryContainer,
                 textColor = colorScheme.onSecondaryContainer,
-                arrowTint = colorScheme.onSurfaceVariant
+                arrowTint = colorScheme.onSurfaceVariant,
+                onClick = {
+                    if (isVerified) {
+                        onSellerSelected()
+                    } else {
+                        showVerifyDialog = true
+                    }
+                }
             )
 
             Spacer(modifier = Modifier.height(30.dp))
 
-            Card(
-
-            ) {
-                TextButton(onClick = {
-                    navController.navigate(Routes.VerificationScreen)
-                }) {
-                    Text(text = "Verify Account")
+            if (!isVerified) {
+                TextButton(
+                    onClick = {
+                        navController.navigate(Routes.VerificationScreen)
+                    }
+                ) {
+                    Text("Verify Account")
                 }
-
             }
-
         }
+    }
+
+    if (showVerifyDialog) {
+        VerifyAccountDialog(
+            onDismiss = { showVerifyDialog = false },
+            onVerifyClick = {
+                showVerifyDialog = false
+                navController.navigate(Routes.VerificationScreen)
+            }
+        )
     }
 }
 
@@ -212,4 +257,30 @@ fun RoleCard(
             )
         }
     }
+}
+
+@Composable
+fun VerifyAccountDialog(
+    onDismiss: () -> Unit,
+    onVerifyClick: () -> Unit
+) {
+    androidx.compose.material3.AlertDialog(
+        onDismissRequest = onDismiss,
+        title = {
+            Text("Account Not Verified")
+        },
+        text = {
+            Text("Please verify your account to continue.")
+        },
+        confirmButton = {
+            TextButton(onClick = onVerifyClick) {
+                Text("Verify Now")
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text("Cancel")
+            }
+        }
+    )
 }

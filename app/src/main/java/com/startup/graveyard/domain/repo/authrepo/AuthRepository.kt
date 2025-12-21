@@ -5,6 +5,8 @@ import com.startup.graveyard.common.ResultState
 import com.startup.graveyard.domain.models.CreateAccountModel
 import com.startup.graveyard.domain.models.CreatedAccountResponseModel
 import com.startup.graveyard.domain.models.DeleteAccountResponseModel
+import com.startup.graveyard.domain.models.LoginUserRequestModel
+import com.startup.graveyard.domain.models.LoginUserResponseModel
 import com.startup.graveyard.domain.models.SendOTPReqeustResponseModel
 import com.startup.graveyard.domain.models.UpdateUserAccountRequestModel
 import com.startup.graveyard.domain.models.UserAccountResponseModel
@@ -36,4 +38,11 @@ interface AuthRepository {
     suspend fun deleteUserAccount(
 
     ): Flow<ResultState<DeleteAccountResponseModel>>
+
+
+    suspend fun checkVerificationStatus(
+
+    ): Flow<ResultState<Boolean>>
+
+
 }

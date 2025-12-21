@@ -1,5 +1,6 @@
 package com.startup.graveyard.presentation.viewmodels
 
+import androidx.compose.ui.window.isPopupLayout
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.firebase.auth.FirebaseAuth
@@ -13,6 +14,7 @@ import com.startup.graveyard.domain.models.UpdateUserAccountRequestModel
 import com.startup.graveyard.domain.models.UserAccountResponseModel
 import com.startup.graveyard.domain.models.VerifyOTPRequestModel
 import com.startup.graveyard.domain.models.VerifyOTPResponseModel
+import com.startup.graveyard.domain.usecase.authusecases.CheckVerificationStatusUseCase
 import com.startup.graveyard.domain.usecase.authusecases.CreateAccountUseCase
 import com.startup.graveyard.domain.usecase.authusecases.DeleteUserAccountUseCase
 import com.startup.graveyard.domain.usecase.authusecases.GetUserAccountDetailsUseCase
@@ -36,7 +38,8 @@ class AuthViewModel @Inject constructor(
     private val firebaseAuth: FirebaseAuth,
     private val sendOTPVerrificationRequestUseCase: SendOTPVerrificationRequestUseCase,
     private val verifyOTPUseCase: VerifyOTPUseCase,
-    private val deleteUserAccountUseCase: DeleteUserAccountUseCase
+    private val deleteUserAccountUseCase: DeleteUserAccountUseCase,
+    private val checkVerificationStatusUseCase: CheckVerificationStatusUseCase
 ) : ViewModel() {
 
     private val _createAccountState = MutableStateFlow(AuthState<CreatedAccountResponseModel>())
@@ -58,14 +61,28 @@ class AuthViewModel @Inject constructor(
     private val _verifyOtpState = MutableStateFlow(AuthState<VerifyOTPResponseModel>())
     val verifyOtpState = _verifyOtpState.asStateFlow()
 
+
+    private val _checkVerificationState = MutableStateFlow(AuthState<Boolean>())
+    val checkVerificationState = _checkVerificationState.asStateFlow()
+
+
     private val _deleteAccountState = MutableStateFlow(AuthState<DeleteAccountResponseModel>())
     val deleteAccountState = _deleteAccountState.asStateFlow()
+
+
+    init {
+        if (firebaseAuth.currentUser != null) {
+            checkVerification()
+        }
+    }
 
     fun deleteAccount() {
         viewModelScope.launch(Dispatchers.IO) {
             deleteUserAccountUseCase.deleteuserAccoutnUseCase().collect {
                 when (it) {
-                    is ResultState.Loading -> _deleteAccountState.value = AuthState(isLoading = true)
+                    is ResultState.Loading -> _deleteAccountState.value =
+                        AuthState(isLoading = true)
+
                     is ResultState.Error -> _deleteAccountState.value =
                         AuthState(isLoading = false, error = it.error)
 
@@ -103,6 +120,25 @@ class AuthViewModel @Inject constructor(
 
                     is ResultState.Loading -> _sendOtpForVerificationState.value =
                         AuthState(isLoading = true)
+                }
+            }
+        }
+    }
+
+    fun checkVerification() {
+        viewModelScope.launch(Dispatchers.IO) {
+            checkVerificationStatusUseCase.checkVerification().collect {
+                when (it) {
+                    is ResultState.Error -> _checkVerificationState.value =
+                        AuthState(isLoading = false, error = it.error)
+
+                    is ResultState.Loading -> {
+                        _checkVerificationState.value = AuthState(isLoading = true)
+                    }
+
+                    is ResultState.Success -> {
+                        _checkVerificationState.value = AuthState(isLoading = false, data = it.data)
+                    }
                 }
             }
         }
