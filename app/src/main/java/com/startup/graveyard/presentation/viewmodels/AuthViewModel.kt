@@ -126,6 +126,7 @@ class AuthViewModel @Inject constructor(
     }
 
     fun checkVerification() {
+       if( _checkVerificationState.value.data!=null ) return
         viewModelScope.launch(Dispatchers.IO) {
             checkVerificationStatusUseCase.checkVerification().collect {
                 when (it) {
@@ -195,6 +196,8 @@ class AuthViewModel @Inject constructor(
     }
 
     fun getUserAccountDetails() {
+
+        if (_accountState.value.data != null) return
         viewModelScope.launch(Dispatchers.IO) {
             getUserAccountDetailsUseCase.getUserAccountUseCase().collect {
                 when (it) {

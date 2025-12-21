@@ -28,6 +28,7 @@ class AssetViewModel @Inject constructor(
 
 
     fun createAsset(createAssetRequestModel: CreateAssetRequestModel) {
+
         viewModelScope.launch(Dispatchers.IO) {
             createAssetUseCase.createAssetUseCase(createAssetRequestModel).collect {
                 when (it) {
@@ -52,6 +53,9 @@ class AssetViewModel @Inject constructor(
         getAssetsPagerUseCase()
             .flow
             .cachedIn(viewModelScope)
+
+
+    val pagingKey = Any()
 
 }
 

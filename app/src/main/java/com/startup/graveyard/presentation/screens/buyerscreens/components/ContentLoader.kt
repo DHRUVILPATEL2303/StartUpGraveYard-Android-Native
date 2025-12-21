@@ -16,7 +16,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 
 @Composable
-fun CenterLoader() {
+fun CenterLoader(modifier: Modifier) {
     Box(
         modifier = Modifier
             .fillMaxSize()

@@ -66,6 +66,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavController
 import androidx.navigation.NavDestination
 import androidx.navigation.NavDestination.Companion.hasRoute
@@ -82,6 +83,7 @@ import com.startup.graveyard.presentation.screens.signupscreen.SignUpScreenUI
 import com.startup.graveyard.presentation.screens.splashscreen.SplashScreenUI
 import com.startup.graveyard.presentation.screens.userselectionscreen.UserSelectionScreenUI
 import com.startup.graveyard.presentation.screens.verificationscreen.EmailVerificationScreenUI
+import com.startup.graveyard.presentation.viewmodels.AssetViewModel
 import com.startup.graveyard.presentation.viewmodels.AuthViewModel
 import com.startup.graveyard.presentation.viewmodels.SplashViewModel
 
@@ -289,19 +291,17 @@ fun AppNavigation(
                         fadeOut(animationSpec = tween(400))
                     }
                 ) {
+                    // CHANGE START: Removed popUpTo to keep UserSelection in stack
                     UserSelectionScreenUI(
                         onBuyerSelected = {
-                            navController.navigate(SubNavigation.BuyerRoutes) {
-                                popUpTo(SubNavigation.UserSelectionRoutes) { inclusive = true }
-                            }
+                            navController.navigate(SubNavigation.BuyerRoutes)
                         },
                         onSellerSelected = {
-                            navController.navigate(SubNavigation.SellerRoutes) {
-                                popUpTo(SubNavigation.UserSelectionRoutes) { inclusive = true }
-                            }
+                            navController.navigate(SubNavigation.SellerRoutes)
                         },
                         navController = navController
                     )
+                    // CHANGE END
                 }
 
                 composable<Routes.VerificationScreen>(
@@ -383,11 +383,24 @@ fun AppNavigation(
                     )
                 }
             ) {
+                @Composable
+                fun getBuyerGraphViewModel(entry: NavBackStackEntry): AssetViewModel {
+                    val parentEntry = remember(entry) {
+                        navController.getBackStackEntry<SubNavigation.BuyerRoutes>()
+                    }
+                    return hiltViewModel<AssetViewModel>(parentEntry)
+                }
+
                 composable<Routes.BuyerHome>(
                     enterTransition = { fadeIn(tween(400)) },
                     exitTransition = { fadeOut(tween(400)) }
-                ) {
-                    BuyerHomeScreenUI()
+                ) { backStackEntry ->
+
+                    val viewModel = getBuyerGraphViewModel(backStackEntry)
+
+                    BuyerHomeScreenUI(
+                        assetViewModel = viewModel,
+                    )
                 }
 
                 composable<Routes.BuyerPivotScreen> {
@@ -480,7 +493,6 @@ fun AppNavigation(
         }
     }
 }
-
 
 
 @Composable
@@ -716,7 +728,7 @@ fun SplitFloatingBottomBarLayout(
                     color = BarBackgroundColor,
                     shape = RoundedCornerShape(40.dp)
                 )
-             .clickable(
+                .clickable(
                     interactionSource = remember { MutableInteractionSource() },
                     indication = null,
                     onClick = {}
@@ -814,11 +826,9 @@ fun RowScope.ModernBottomBarItem(
 }
 
 
+
 fun NavController.goToUserSelection() {
-    navigate(SubNavigation.UserSelectionRoutes) {
-        popUpTo(0) { inclusive = true }
-        launchSingleTop = true
-    }
+    popBackStack<Routes.UserSelectionScreen>(inclusive = false)
 }
 
 @Composable

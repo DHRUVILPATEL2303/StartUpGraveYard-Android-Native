@@ -4,8 +4,10 @@ import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -36,7 +38,7 @@ enum class BuyerHomeTab {
 
 @Composable
 fun BuyerHomeScreenUI(
-    assetViewModel: AssetViewModel = hiltViewModel()
+    assetViewModel: AssetViewModel
 ) {
     var selectedTab by remember { mutableStateOf(BuyerHomeTab.ASSETS) }
 
@@ -92,23 +94,28 @@ fun SlidingSegmentedControl(
 
     val indicatorOffset by animateDpAsState(
         targetValue = if (selectedTab == BuyerHomeTab.ASSETS) 0.dp else tabWidth,
-        animationSpec = tween(durationMillis = 300, easing = FastOutSlowInEasing),
+        animationSpec = tween(280, easing = FastOutSlowInEasing),
         label = "indicator"
     )
+    val isLight = !isSystemInDarkTheme()
+
+    val selectedPill = Color(36, 48, 70)
+    val containerBg = if (isLight) Color(245, 247, 250) else Color(28, 30, 35)
+    val borderColor = if (isLight) Color(200, 205, 215) else Color(70, 75, 85)
 
     Box(
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 24.dp, vertical = 12.dp)
-            .height(50.dp)
+            .height(52.dp)
             .clip(CircleShape)
-            .background(MaterialTheme.colorScheme.surfaceVariant)
-            .onGloballyPositioned { coordinates ->
-                with(density) {
-                    tabWidth = coordinates.size.width.toDp() / 2
-                }
+            .background(containerBg)
+            .border(1.5.dp, borderColor, CircleShape)
+            .onGloballyPositioned {
+                with(density) { tabWidth = it.size.width.toDp() / 2 }
             }
     ) {
+
         Box(
             modifier = Modifier
                 .offset(x = indicatorOffset)
@@ -116,38 +123,42 @@ fun SlidingSegmentedControl(
                 .fillMaxHeight()
                 .padding(4.dp)
                 .clip(CircleShape)
-                .background(MaterialTheme.colorScheme.surface)
+                .background(selectedPill)
                 .shadow(
-                    elevation = 2.dp,
+                    elevation = 6.dp,
                     shape = CircleShape,
-                    spotColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.1f)
+                    ambientColor = selectedPill.copy(alpha = 0.35f),
+                    spotColor = selectedPill.copy(alpha = 0.25f)
                 )
-                .zIndex(0f)
         )
 
-        // 2. The Text Labels (Foreground)
-        Row(modifier = Modifier.fillMaxSize()) {
+        Row(Modifier.fillMaxSize()) {
             BuyerTabItem(
                 text = "Assets",
                 isSelected = selectedTab == BuyerHomeTab.ASSETS,
                 modifier = Modifier.weight(1f),
+                selectedTextColor = Color.White,
+                unselectedTextColor = if (isLight) Color(90, 95, 110) else Color(170, 175, 185),
                 onClick = { onTabSelected(BuyerHomeTab.ASSETS) }
             )
             BuyerTabItem(
                 text = "Pivot",
                 isSelected = selectedTab == BuyerHomeTab.PIVOT,
                 modifier = Modifier.weight(1f),
+                selectedTextColor = Color.White,
+                unselectedTextColor = if (isLight) Color(90, 95, 110) else Color(170, 175, 185),
                 onClick = { onTabSelected(BuyerHomeTab.PIVOT) }
             )
         }
     }
 }
-
 @Composable
 fun BuyerTabItem(
     text: String,
     isSelected: Boolean,
     modifier: Modifier = Modifier,
+    selectedTextColor: Color,
+    unselectedTextColor: Color,
     onClick: () -> Unit
 ) {
     Box(
@@ -161,12 +172,9 @@ fun BuyerTabItem(
     ) {
         Text(
             text = text,
+            fontWeight = if (isSelected) FontWeight.SemiBold else FontWeight.Medium,
             style = MaterialTheme.typography.titleSmall,
-            fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
-            color = if (isSelected)
-                MaterialTheme.colorScheme.onSurface
-            else
-                MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
+            color = if (isSelected) selectedTextColor else unselectedTextColor
         )
     }
 }

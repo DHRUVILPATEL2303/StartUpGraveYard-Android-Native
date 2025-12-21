@@ -65,6 +65,7 @@ dependencies {
     implementation(libs.androidx.compose.ui.tooling.preview)
     implementation(libs.androidx.compose.material3)
     implementation(libs.firebase.auth)
+    implementation(libs.androidx.material3)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
@@ -100,6 +101,9 @@ dependencies {
     implementation("androidx.paging:paging-runtime-ktx:3.3.6")
     implementation("androidx.paging:paging-compose:3.3.6")
 
+
+    //viewmodel lifecycle
+    implementation("androidx.lifecycle:lifecycle-runtime-compose:2.10.0")
 
     implementation("androidx.compose.material3:material3-android:1.5.0-alpha04")
 

@@ -43,6 +43,7 @@ import com.startup.graveyard.presentation.viewmodels.AuthViewModel
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 
 
 @Composable
@@ -52,19 +53,29 @@ fun UserSelectionScreenUI(
     navController: NavController,
     authViewModel: AuthViewModel = hiltViewModel()
 ) {
-    val accountState by authViewModel.accountState.collectAsState()
-    val verificationState by authViewModel.checkVerificationState.collectAsState()
+    val accountState by authViewModel.accountState.collectAsStateWithLifecycle()
+    val verificationState by authViewModel.checkVerificationState.collectAsStateWithLifecycle()
 
     val isVerified = verificationState.data == true
     var showVerifyDialog by remember { mutableStateOf(false) }
 
     val colorScheme = MaterialTheme.colorScheme
     val typography = MaterialTheme.typography
-
-    LaunchedEffect(Unit) {
-        authViewModel.getUserAccountDetails()
-        authViewModel.checkVerification()
+    LaunchedEffect(accountState.data) {
+        if (accountState.data == null) {
+            authViewModel.getUserAccountDetails()
+        }
     }
+
+    LaunchedEffect(verificationState.data) {
+        if (verificationState.data == null) {
+            authViewModel.checkVerification()
+        }
+    }
+
+    val isAccountLoading = accountState.isLoading
+    val userName = accountState.data?.data?.name
+
 
     Scaffold(
         topBar = {
@@ -79,11 +90,24 @@ fun UserSelectionScreenUI(
 
                         Spacer(modifier = Modifier.width(8.dp))
 
-                        Text(
-                            text = accountState.data?.data?.name.orEmpty(),
-                            style = typography.titleMedium.copy(fontWeight = FontWeight.ExtraBold),
-                            color = colorScheme.primary
-                        )
+
+                        if (isAccountLoading && userName == null) {
+                            Box(
+                                modifier = Modifier
+                                    .height(20.dp)
+                                    .width(120.dp)
+                                    .background(
+                                        colorScheme.surfaceVariant,
+                                        RoundedCornerShape(6.dp)
+                                    )
+                            )
+                        } else {
+                            Text(
+                                text = userName ?: "",
+                                style = typography.titleMedium.copy(fontWeight = FontWeight.ExtraBold),
+                                color = colorScheme.primary
+                            )
+                        }
 
                         if (isVerified) {
                             Spacer(modifier = Modifier.width(6.dp))
