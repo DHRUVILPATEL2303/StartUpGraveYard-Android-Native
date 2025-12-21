@@ -44,6 +44,16 @@ sealed class Routes {
     object VerificationScreen
 
 
+    @Serializable
+    object BuyerHomeScreen
+
+
+    @Serializable
+    object BuyerAssetsScreen
+
+    @Serializable
+    object BuyerPivotScreen
+
 }
 
 

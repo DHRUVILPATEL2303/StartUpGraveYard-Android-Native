@@ -96,6 +96,10 @@ dependencies {
     implementation("com.airbnb.android:lottie-compose:6.7.1")
     implementation("androidx.core:core-splashscreen:1.2.0")
 
+    //pagination
+    implementation("androidx.paging:paging-runtime-ktx:3.3.6")
+    implementation("androidx.paging:paging-compose:3.3.6")
+
 
     implementation("androidx.compose.material3:material3-android:1.5.0-alpha04")
 

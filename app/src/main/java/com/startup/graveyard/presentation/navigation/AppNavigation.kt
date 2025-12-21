@@ -1,5 +1,6 @@
 package com.startup.graveyard.presentation.navigation
 
+import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedContentTransitionScope
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateColorAsState
@@ -12,6 +13,7 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -28,16 +30,13 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.ArrowBackIosNew
 import androidx.compose.material.icons.filled.Dashboard
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.ShoppingCart
-import androidx.compose.material.icons.filled.SwapHoriz
 import androidx.compose.material.icons.filled.SwipeLeftAlt
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
@@ -46,15 +45,22 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
+import androidx.compose.ui.input.nestedscroll.NestedScrollSource
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -70,6 +76,7 @@ import androidx.navigation.compose.navigation
 import androidx.navigation.compose.rememberNavController
 import com.google.firebase.auth.FirebaseAuth
 import com.startup.graveyard.presentation.screens.accountscreen.AccountScreenUI
+import com.startup.graveyard.presentation.screens.buyerscreens.BuyerHomeScreenUI
 import com.startup.graveyard.presentation.screens.loginscreen.LoginScreenUI
 import com.startup.graveyard.presentation.screens.signupscreen.SignUpScreenUI
 import com.startup.graveyard.presentation.screens.splashscreen.SplashScreenUI
@@ -102,6 +109,22 @@ fun AppNavigation(
 ) {
     val navController = rememberNavController()
 
+    var isBottomBarCollapsed by rememberSaveable { mutableStateOf(false) }
+
+    val nestedScrollConnection = remember {
+        object : NestedScrollConnection {
+            override fun onPreScroll(available: Offset, source: NestedScrollSource): Offset {
+                val delta = available.y
+                if (delta < -8f) {
+                    isBottomBarCollapsed = true
+                } else if (delta > 8f) {
+                    isBottomBarCollapsed = false
+                }
+                return Offset.Zero
+            }
+        }
+    }
+
     if (firebaseAuth.currentUser != null) {
         LaunchedEffect(Unit) {
             authViewModel.getUserAccountDetails()
@@ -112,10 +135,21 @@ fun AppNavigation(
     val destination = backStackEntry?.destination
 
     Scaffold(
+        modifier = Modifier.nestedScroll(nestedScrollConnection),
         bottomBar = {
             when {
-                destination.isBuyerDestination() -> BuyerBottomBar(navController)
-                destination.isSellerDestination() -> SellerBottomBar(navController)
+                destination.isBuyerDestination() ->
+                    BuyerBottomBar(
+                        navController = navController,
+                        isCollapsed = isBottomBarCollapsed,
+                        onExpand = { isBottomBarCollapsed = false }
+                    )
+                destination.isSellerDestination() ->
+                    SellerBottomBar(
+                        navController = navController,
+                        isCollapsed = isBottomBarCollapsed,
+                        onExpand = { isBottomBarCollapsed = false }
+                    )
             }
         }
     ) { paddingValues ->
@@ -353,7 +387,15 @@ fun AppNavigation(
                     enterTransition = { fadeIn(tween(400)) },
                     exitTransition = { fadeOut(tween(400)) }
                 ) {
-                    BuyerHomeScreen()
+                    BuyerHomeScreenUI()
+                }
+
+                composable<Routes.BuyerPivotScreen> {
+
+                }
+
+                composable<Routes.BuyerAssetsScreen> {
+
                 }
                 composable<Routes.BuyerProductDetails>(
                     enterTransition = {
@@ -440,88 +482,104 @@ fun AppNavigation(
 }
 
 
-//@Composable
-//fun BuyerBottomBar(navController: NavController) {
-//    val backStackEntry by navController.currentBackStackEntryAsState()
-//    val destination = backStackEntry?.destination
-//
-//    ModernFloatingBarContainer {
-//        ModernBottomBarItem(
-//            icon = Icons.Default.Home,
-//            label = "Home",
-//            selected = destination?.hasRoute<Routes.BuyerHome>() == true,
-//            onClick = {
-//                navController.navigate(Routes.BuyerHome) {
-//                    popUpTo(SubNavigation.BuyerRoutes)
-//                    launchSingleTop = true
-//                }
-//            }
-//        )
-//
-//        ModernBottomBarItem(
-//            icon = Icons.Default.ShoppingCart,
-//            label = "Cart",
-//            selected = destination?.hasRoute<Routes.BuyerProductDetails>() == true,
-//            onClick = {
-//                navController.navigate(Routes.BuyerProductDetails)
-//            }
-//        )
-//
-//        ModernBottomBarItem(
-//            icon = Icons.Default.SwapHoriz,
-//            label = "Switch",
-//            selected = false,
-//            isActionItem = true,
-//            onClick = {
-//                navController.goToUserSelection()
-//            }
-//        )
-//    }
-//}
-
-//@Composable
-//fun SellerBottomBar(navController: NavController) {
-//    val backStackEntry by navController.currentBackStackEntryAsState()
-//    val destination = backStackEntry?.destination
-//
-//    ModernFloatingBarContainer {
-//        ModernBottomBarItem(
-//            icon = Icons.Default.Dashboard,
-//            label = "Dash",
-//            selected = destination?.hasRoute<Routes.SellerDashboard>() == true,
-//            onClick = {
-//                navController.navigate(Routes.SellerDashboard) {
-//                    popUpTo(SubNavigation.SellerRoutes)
-//                    launchSingleTop = true
-//                }
-//            }
-//        )
-//
-//        ModernBottomBarItem(
-//            icon = Icons.Default.Add,
-//            label = "Add",
-//            selected = destination?.hasRoute<Routes.SellerAddProduct>() == true,
-//            onClick = {
-//                navController.navigate(Routes.SellerAddProduct)
-//            }
-//        )
-//
-//        ModernBottomBarItem(
-//            icon = Icons.Default.ArrowBackIosNew,
-//            label = "Switch",
-//            selected = false,
-//            isActionItem = true,
-//            onClick = {
-//                navController.goToUserSelection()
-//            }
-//        )
-//    }
-//}
-
 
 @Composable
-fun ModernFloatingBarContainer(
-    content: @Composable RowScope.() -> Unit
+fun BuyerBottomBar(
+    navController: NavController,
+    isCollapsed: Boolean,
+    onExpand: () -> Unit
+) {
+    val backStackEntry by navController.currentBackStackEntryAsState()
+    val destination = backStackEntry?.destination
+
+    val isHome = destination?.hasRoute<Routes.BuyerHome>() == true
+    val isCart = destination?.hasRoute<Routes.BuyerProductDetails>() == true
+
+    AdaptiveBottomBar(
+        isCollapsed = isCollapsed,
+        onSwitchClick = { navController.goToUserSelection() },
+        selectedIcon = if (isCart) Icons.Default.ShoppingCart else Icons.Default.Home,
+        onCompactRightClick = onExpand,
+        expandedContent = {
+            ModernBottomBarItem(
+                icon = Icons.Default.Home,
+                label = "Home",
+                selected = isHome,
+                onClick = {
+                    navController.navigate(Routes.BuyerHome) {
+                        popUpTo(SubNavigation.BuyerRoutes)
+                        launchSingleTop = true
+                    }
+                }
+            )
+
+            ModernBottomBarItem(
+                icon = Icons.Default.ShoppingCart,
+                label = "Cart",
+                selected = isCart,
+                onClick = {
+                    navController.navigate(Routes.BuyerProductDetails) {
+                        launchSingleTop = true
+                    }
+                }
+            )
+        }
+    )
+}
+
+@Composable
+fun SellerBottomBar(
+    navController: NavController,
+    isCollapsed: Boolean,
+    onExpand: () -> Unit
+) {
+    val backStackEntry by navController.currentBackStackEntryAsState()
+    val destination = backStackEntry?.destination
+
+    val isDash = destination?.hasRoute<Routes.SellerDashboard>() == true
+    val isAdd = destination?.hasRoute<Routes.SellerAddProduct>() == true
+
+    AdaptiveBottomBar(
+        isCollapsed = isCollapsed,
+        onSwitchClick = { navController.goToUserSelection() },
+        selectedIcon = if (isAdd) Icons.Default.Add else Icons.Default.Dashboard,
+        onCompactRightClick = onExpand, // CLICKING EXPANDS THE BAR
+        expandedContent = {
+            ModernBottomBarItem(
+                icon = Icons.Default.Dashboard,
+                label = "Dash",
+                selected = isDash,
+                onClick = {
+                    navController.navigate(Routes.SellerDashboard) {
+                        popUpTo(SubNavigation.SellerRoutes)
+                        launchSingleTop = true
+                    }
+                }
+            )
+
+            ModernBottomBarItem(
+                icon = Icons.Default.Add,
+                label = "Add",
+                selected = isAdd,
+                onClick = {
+                    navController.navigate(Routes.SellerAddProduct)
+                }
+            )
+        }
+    )
+}
+
+
+/**
+ * Animated Wrapper that switches between Compact (Scrolled) and Expanded (Default) views.
+ */
+@Composable
+fun AdaptiveBottomBar(
+    isCollapsed: Boolean,
+    onSwitchClick: () -> Unit,
+    selectedIcon: ImageVector,
+    onCompactRightClick: () -> Unit,
+    expandedContent: @Composable RowScope.() -> Unit
 ) {
     Box(
         modifier = Modifier
@@ -530,8 +588,125 @@ fun ModernFloatingBarContainer(
             .navigationBarsPadding(),
         contentAlignment = Alignment.BottomCenter
     ) {
+        AnimatedContent(
+            targetState = isCollapsed,
+            transitionSpec = {
+                (fadeIn(animationSpec = tween(300)) + slideInVertically { it / 2 }) togetherWith
+                        (fadeOut(animationSpec = tween(300)) + slideOutVertically { it / 2 })
+            },
+            label = "BottomBarModeSwitch"
+        ) { collapsed ->
+            if (collapsed) {
+                CompactFloatingBar(
+                    onLeftClick = onSwitchClick,
+                    selectedIcon = selectedIcon,
+                    onRightClick = onCompactRightClick
+                )
+            } else {
+                SplitFloatingBottomBarLayout(
+                    onSwitchClick = onSwitchClick,
+                    content = expandedContent
+                )
+            }
+        }
+    }
+}
+
+/**
+ * The Small UI: Switch Button on Left, Active Icon Button on Right.
+ */
+@Composable
+fun CompactFloatingBar(
+    onLeftClick: () -> Unit,
+    selectedIcon: ImageVector,
+    onRightClick: () -> Unit
+) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Box(
+            modifier = Modifier
+                .size(50.dp)
+                .shadow(elevation = 10.dp, shape = CircleShape, spotColor = Color.Black.copy(0.3f))
+                .background(BarBackgroundColor, CircleShape)
+                .clip(CircleShape)
+                .clickable { onLeftClick() },
+            contentAlignment = Alignment.Center
+        ) {
+            Icon(
+                imageVector = Icons.Default.SwipeLeftAlt,
+                contentDescription = "Switch",
+                tint = Color(0xFFFF6E40),
+                modifier = Modifier.size(24.dp)
+            )
+        }
+
+        Box(
+            modifier = Modifier
+                .size(50.dp)
+                .shadow(elevation = 10.dp, shape = CircleShape, spotColor = Color.Black.copy(0.3f))
+                .background(BarBackgroundColor, CircleShape)
+                .clip(CircleShape)
+                .clickable { onRightClick() },
+            contentAlignment = Alignment.Center
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(36.dp)
+                    .background(ActiveIndicatorColor, CircleShape),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    imageVector = selectedIcon,
+                    contentDescription = "Selected",
+                    tint = ActiveIconColor,
+                    modifier = Modifier.size(20.dp)
+                )
+            }
+        }
+    }
+}
+
+/**
+ * The Large UI: Switch Button on Left (Big), Navigation Bar on Right.
+ */
+@Composable
+fun SplitFloatingBottomBarLayout(
+    onSwitchClick: () -> Unit,
+    content: @Composable RowScope.() -> Unit
+) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(16.dp)
+    ) {
+        Box(
+            modifier = Modifier
+                .size(66.dp)
+                .shadow(
+                    elevation = 16.dp,
+                    shape = CircleShape,
+                    spotColor = Color.Black.copy(alpha = 0.35f)
+                )
+                .background(BarBackgroundColor, CircleShape)
+                .clip(CircleShape)
+                .clickable { onSwitchClick() },
+            contentAlignment = Alignment.Center
+        ) {
+            Icon(
+                imageVector = Icons.Default.SwipeLeftAlt,
+                contentDescription = "Switch Role",
+                tint = Color(0xFFFF6E40),
+                modifier = Modifier.size(34.dp)
+            )
+        }
+
         Row(
             modifier = Modifier
+                .weight(1f)
+                .height(72.dp)
                 .shadow(
                     elevation = 16.dp,
                     shape = RoundedCornerShape(40.dp),
@@ -541,8 +716,11 @@ fun ModernFloatingBarContainer(
                     color = BarBackgroundColor,
                     shape = RoundedCornerShape(40.dp)
                 )
-                .height(72.dp)
-                .fillMaxWidth()
+             .clickable(
+                    interactionSource = remember { MutableInteractionSource() },
+                    indication = null,
+                    onClick = {}
+                )
                 .padding(horizontal = 12.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween,
@@ -582,7 +760,13 @@ fun RowScope.ModernBottomBarItem(
         modifier = Modifier
             .weight(1f)
             .fillMaxHeight()
-          ,
+            .clickable(
+                interactionSource = interactionSource,
+                indication = null
+            ) {
+                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                onClick()
+            },
         contentAlignment = Alignment.Center
     ) {
         Column(
@@ -612,15 +796,7 @@ fun RowScope.ModernBottomBarItem(
                     imageVector = icon,
                     contentDescription = label,
                     tint = if (isActionItem && !selected) Color(0xFFFF5252) else iconColor,
-                    modifier = Modifier.size(24.dp).clickable(
-                            interactionSource = interactionSource,
-                    indication = null
-                ) {
-                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                    onClick()
-
-
-                    }
+                    modifier = Modifier.size(24.dp)
                 )
             }
 
@@ -647,225 +823,21 @@ fun NavController.goToUserSelection() {
 
 @Composable
 fun SellerAddProductScreen() {
-    Box(
-        modifier = Modifier.fillMaxSize(),
-        contentAlignment = Alignment.Center
-    ) {
+    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
         Text("Seller Add Product")
     }
 }
 
 @Composable
 fun SellerDashboardScreen() {
-    Box(
-        modifier = Modifier.fillMaxSize(),
-        contentAlignment = Alignment.Center
-    ) {
+    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
         Text("Seller Dashboard")
     }
 }
 
 @Composable
 fun BuyerProductDetailsScreen() {
-    Box(
-        modifier = Modifier.fillMaxSize(),
-        contentAlignment = Alignment.Center
-    ) {
+    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
         Text("Buyer Product Details")
-    }
-}
-
-@Composable
-fun BuyerBottomBar(navController: NavController) {
-    val backStackEntry by navController.currentBackStackEntryAsState()
-    val destination = backStackEntry?.destination
-
-    SplitFloatingBottomBar(
-        onSwitchClick = { navController.goToUserSelection() }
-    ) {
-        ModernBottomBarItem(
-            icon = Icons.Default.Home,
-            label = "Home",
-            selected = destination?.hasRoute<Routes.BuyerHome>() == true,
-            onClick = {
-                navController.navigate(Routes.BuyerHome) {
-                    popUpTo(SubNavigation.BuyerRoutes)
-                    launchSingleTop = true
-                }
-            }
-        )
-
-        ModernBottomBarItem(
-            icon = Icons.Default.ShoppingCart,
-            label = "Cart",
-            selected = destination?.hasRoute<Routes.BuyerProductDetails>() == true,
-            onClick = {
-                navController.navigate(Routes.BuyerProductDetails){
-                    launchSingleTop = true
-                }
-            }
-        )
-    }
-}
-
-@Composable
-fun FloatingBarWithLeftAction(
-    onSwitchClick: () -> Unit,
-    content: @Composable RowScope.() -> Unit
-) {
-    Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 20.dp, vertical = 24.dp)
-            .navigationBarsPadding(),
-        contentAlignment = Alignment.BottomCenter
-    ) {
-
-        Box(
-            modifier = Modifier
-                .align(Alignment.CenterStart)
-                .size(56.dp)
-                .shadow(
-                    elevation = 12.dp,
-                    shape = CircleShape,
-                    spotColor = Color.Black.copy(alpha = 0.3f)
-                )
-                .background(
-                    color = BarBackgroundColor,
-                    shape = CircleShape
-                )
-                .clickable { onSwitchClick() },
-            contentAlignment = Alignment.Center
-        ) {
-            Icon(
-                imageVector = Icons.Default.SwapHoriz,
-                contentDescription = "Switch role",
-                tint = Color.White
-            )
-        }
-
-        Spacer(modifier = Modifier.width(20.dp))
-
-        Row(
-            modifier = Modifier
-                .shadow(
-                    elevation = 16.dp,
-                    shape = RoundedCornerShape(40.dp),
-                    spotColor = Color.Black.copy(alpha = 0.35f)
-                )
-                .background(
-                    color = BarBackgroundColor,
-                    shape = RoundedCornerShape(40.dp)
-                )
-                .height(72.dp)
-                .fillMaxWidth(0.75f)
-                .padding(horizontal = 16.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween,
-            content = content
-        )
-    }
-}
-
-@Composable
-fun BuyerHomeScreen() {
-    Box(
-        modifier = Modifier.fillMaxSize(),
-        contentAlignment = Alignment.Center
-    ) {
-        Text("Buyer Home Screen")
-    }
-}
-
-
-@Composable
-fun SellerBottomBar(navController: NavController) {
-    val backStackEntry by navController.currentBackStackEntryAsState()
-    val destination = backStackEntry?.destination
-
-    SplitFloatingBottomBar(
-        onSwitchClick = { navController.goToUserSelection() }
-    ) {
-        ModernBottomBarItem(
-            icon = Icons.Default.Dashboard,
-            label = "Dash",
-            selected = destination?.hasRoute<Routes.SellerDashboard>() == true,
-            onClick = {
-                navController.navigate(Routes.SellerDashboard) {
-                    popUpTo(SubNavigation.SellerRoutes)
-                    launchSingleTop = true
-                }
-            }
-        )
-
-        ModernBottomBarItem(
-            icon = Icons.Default.Add,
-            label = "Add",
-            selected = destination?.hasRoute<Routes.SellerAddProduct>() == true,
-            onClick = {
-                navController.navigate(Routes.SellerAddProduct)
-            }
-        )
-    }
-}
-
-
-@Composable
-fun SplitFloatingBottomBar(
-    onSwitchClick: () -> Unit,
-    content: @Composable RowScope.() -> Unit
-) {
-    Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 24.dp, vertical = 24.dp)
-            .navigationBarsPadding(),
-        contentAlignment = Alignment.BottomCenter
-    ) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(16.dp)
-        ) {
-            Box(
-                modifier = Modifier
-                    .size(66.dp)
-                    .shadow(
-                        elevation = 16.dp,
-                        shape = CircleShape,
-                        spotColor = Color.Black.copy(alpha = 0.35f)
-                    )
-                    .background(BarBackgroundColor, CircleShape)
-                    .clip(CircleShape)
-                    .clickable { onSwitchClick() },
-                contentAlignment = Alignment.Center
-            ) {
-                Icon(
-                    imageVector = Icons.Default.SwipeLeftAlt,
-                    contentDescription = "Switch Role",
-                    tint = Color(0xFFFF6E40),
-                    modifier = Modifier.size(34.dp)
-                )
-            }
-
-            Row(
-                modifier = Modifier
-                    .weight(1f)
-                    .height(72.dp)
-                    .shadow(
-                        elevation = 16.dp,
-                        shape = RoundedCornerShape(40.dp),
-                        spotColor = Color.Black.copy(alpha = 0.35f)
-                    )
-                    .background(
-                        color = BarBackgroundColor,
-                        shape = RoundedCornerShape(40.dp)
-                    )
-                    .padding(horizontal = 12.dp),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween,
-                content = content
-            )
-        }
     }
 }
