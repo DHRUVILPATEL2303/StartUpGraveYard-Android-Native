@@ -48,6 +48,9 @@ class AssetViewModel @Inject constructor(
         }
     }
 
+    fun resetCreateAssetState() {
+        _createAssetState.value = AssetState()
+    }
 
     val assetsPagingFlow =
         getAssetsPagerUseCase()

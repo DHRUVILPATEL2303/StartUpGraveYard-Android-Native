@@ -1,5 +1,6 @@
 package com.startup.graveyard.presentation.viewmodels
 
+import android.util.Log
 import androidx.compose.ui.window.isPopupLayout
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -126,7 +127,6 @@ class AuthViewModel @Inject constructor(
     }
 
     fun checkVerification() {
-       if( _checkVerificationState.value.data!=null ) return
         viewModelScope.launch(Dispatchers.IO) {
             checkVerificationStatusUseCase.checkVerification().collect {
                 when (it) {
@@ -139,6 +139,7 @@ class AuthViewModel @Inject constructor(
 
                     is ResultState.Success -> {
                         _checkVerificationState.value = AuthState(isLoading = false, data = it.data)
+                        Log.d("VEIRIFCATION STATUS", it.data.toString())
                     }
                 }
             }

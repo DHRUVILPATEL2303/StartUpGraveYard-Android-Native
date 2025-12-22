@@ -79,6 +79,7 @@ import com.google.firebase.auth.FirebaseAuth
 import com.startup.graveyard.presentation.screens.accountscreen.AccountScreenUI
 import com.startup.graveyard.presentation.screens.buyerscreens.BuyerHomeScreenUI
 import com.startup.graveyard.presentation.screens.loginscreen.LoginScreenUI
+import com.startup.graveyard.presentation.screens.sellerscreen.SellerHomeScreenUI
 import com.startup.graveyard.presentation.screens.signupscreen.SignUpScreenUI
 import com.startup.graveyard.presentation.screens.splashscreen.SplashScreenUI
 import com.startup.graveyard.presentation.screens.userselectionscreen.UserSelectionScreenUI
@@ -454,7 +455,7 @@ fun AppNavigation(
                     enterTransition = { fadeIn(tween(400)) },
                     exitTransition = { fadeOut(tween(400)) }
                 ) {
-                    SellerDashboardScreen()
+                  SellerDashboardScreen()
                 }
                 composable<Routes.SellerAddProduct>(
                     enterTransition = {
@@ -482,7 +483,7 @@ fun AppNavigation(
                         )
                     }
                 ) {
-                    SellerAddProductScreen()
+                    SellerHomeScreenUI(assetViewModel=assetViewModel,firebaseAuth)
                 }
             }
         }
