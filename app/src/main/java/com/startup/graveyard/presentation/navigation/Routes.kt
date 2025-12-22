@@ -54,6 +54,16 @@ sealed class Routes {
     @Serializable
     object BuyerPivotScreen
 
+    @Serializable
+    data class SellerSpecificAssetScreen(
+        val id : String
+    )
+
+    @Serializable
+    data class BuyerSpecificAssetScreen(
+        val id : String
+    )
+
 }
 
 

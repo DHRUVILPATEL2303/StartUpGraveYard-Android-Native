@@ -6,6 +6,7 @@ import com.startup.graveyard.common.ResultState
 import com.startup.graveyard.domain.models.CreateAssetRequestModel
 import com.startup.graveyard.domain.models.CreateAssetResponseModel
 import com.startup.graveyard.domain.models.assets.Asset
+import com.startup.graveyard.domain.models.assets.GetSpecificAssetResponseModel
 import com.startup.graveyard.domain.models.getallassets.GetAllAssetsResponseModel
 import kotlinx.coroutines.flow.Flow
 
@@ -18,6 +19,8 @@ interface AssetRepository {
     fun getAssetsPager(): Pager<Int, Asset>
 
     fun getAllSpecificUserAsset() :Pager<Int, Asset>
+
+    suspend fun getSpecificAssetByID(id : String) : Flow<ResultState<Asset>>
 
 
 }

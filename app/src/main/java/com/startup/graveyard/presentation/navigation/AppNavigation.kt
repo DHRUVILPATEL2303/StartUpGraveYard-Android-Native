@@ -74,16 +74,19 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.navigation
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.toRoute
 import com.google.firebase.auth.FirebaseAuth
 import com.startup.graveyard.presentation.screens.accountscreen.AccountScreenUI
 import com.startup.graveyard.presentation.screens.buyerscreens.BuyerHomeScreenUI
+import com.startup.graveyard.presentation.screens.buyerscreens.BuyerSpecificAssetScreenUI
 import com.startup.graveyard.presentation.screens.loginscreen.LoginScreenUI
 import com.startup.graveyard.presentation.screens.sellerscreen.SellerAddScreenUI
+import com.startup.graveyard.presentation.screens.sellerscreen.SellerDashboardScreenUI
 import com.startup.graveyard.presentation.screens.signupscreen.SignUpScreenUI
 import com.startup.graveyard.presentation.screens.splashscreen.SplashScreenUI
 import com.startup.graveyard.presentation.screens.userselectionscreen.UserSelectionScreenUI
 import com.startup.graveyard.presentation.screens.verificationscreen.EmailVerificationScreenUI
-import com.startup.graveyard.presentation.viewmodels.AssetViewModel
+import com.startup.graveyard.presentation.viewmodels.assets.AssetViewModel
 import com.startup.graveyard.presentation.viewmodels.AuthViewModel
 import com.startup.graveyard.presentation.viewmodels.SplashViewModel
 
@@ -292,7 +295,6 @@ fun AppNavigation(
                         fadeOut(animationSpec = tween(400))
                     }
                 ) {
-                    // CHANGE START: Removed popUpTo to keep UserSelection in stack
                     UserSelectionScreenUI(
                         onBuyerSelected = {
                             navController.navigate(SubNavigation.BuyerRoutes)
@@ -302,7 +304,6 @@ fun AppNavigation(
                         },
                         navController = navController
                     )
-                    // CHANGE END
                 }
 
                 composable<Routes.VerificationScreen>(
@@ -395,14 +396,41 @@ fun AppNavigation(
 
                     BuyerHomeScreenUI(
                         assetViewModel = assetViewModel,
+                        navController=navController
+
                     )
                 }
 
-                composable<Routes.BuyerPivotScreen> {
-
-                }
-
-                composable<Routes.BuyerAssetsScreen> {
+                composable<Routes.BuyerSpecificAssetScreen> (
+                    enterTransition = {
+                        slideIntoContainer(
+                            AnimatedContentTransitionScope.SlideDirection.Left,
+                            animationSpec = tween(400)
+                        )
+                    },
+                    exitTransition = {
+                        slideOutOfContainer(
+                            AnimatedContentTransitionScope.SlideDirection.Left,
+                            animationSpec = tween(400)
+                        )
+                    },
+                    popEnterTransition = {
+                        slideIntoContainer(
+                            AnimatedContentTransitionScope.SlideDirection.Right,
+                            animationSpec = tween(400)
+                        )
+                    },
+                    popExitTransition = {
+                        slideOutOfContainer(
+                            AnimatedContentTransitionScope.SlideDirection.Right,
+                            animationSpec = tween(400)
+                        )
+                    }
+                ){
+                    val data = it.toRoute<Routes.BuyerSpecificAssetScreen>()
+                    BuyerSpecificAssetScreenUI(assetId = data.id,assetViewModel = assetViewModel, onBack = {
+                        navController.popBackStack()
+                    })
 
                 }
                 composable<Routes.BuyerProductDetails>(
@@ -454,7 +482,7 @@ fun AppNavigation(
                     enterTransition = { fadeIn(tween(400)) },
                     exitTransition = { fadeOut(tween(400)) }
                 ) {
-                  SellerDashboardScreen()
+                    SellerDashboardScreenUI(assetViewModel)
                 }
                 composable<Routes.SellerAddProduct>(
                     enterTransition = {

@@ -10,26 +10,20 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.geometry.CornerRadius
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.zIndex
-import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
-import com.startup.graveyard.presentation.viewmodels.AssetViewModel
+import androidx.navigation.NavController
+import com.startup.graveyard.presentation.navigation.Routes
+import com.startup.graveyard.presentation.viewmodels.assets.AssetViewModel
 
 enum class BuyerHomeTab {
     ASSETS,
@@ -38,7 +32,8 @@ enum class BuyerHomeTab {
 
 @Composable
 fun BuyerHomeScreenUI(
-    assetViewModel: AssetViewModel
+    assetViewModel: AssetViewModel,
+    navController: NavController
 ) {
     var selectedTab by remember { mutableStateOf(BuyerHomeTab.ASSETS) }
 
@@ -67,7 +62,9 @@ fun BuyerHomeScreenUI(
                 when (selectedTab) {
                     BuyerHomeTab.ASSETS -> BuyerAssetsContent(
                         viewModel = assetViewModel,
-                        onAssetClick = { }
+                        onAssetClick = { id->
+                            navController.navigate(Routes.BuyerSpecificAssetScreen(id=id.toString()))
+                        }
                     )
                     BuyerHomeTab.PIVOT -> Box(
                         modifier = Modifier.fillMaxSize(),

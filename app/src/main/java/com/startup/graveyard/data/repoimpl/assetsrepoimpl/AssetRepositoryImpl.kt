@@ -1,5 +1,6 @@
 package com.startup.graveyard.data.repoimpl.assetsrepoimpl
 
+import android.util.Log
 import androidx.compose.ui.geometry.Rect
 import androidx.paging.Pager
 import androidx.paging.PagingConfig
@@ -8,9 +9,11 @@ import com.startup.graveyard.common.ResultState
 import com.startup.graveyard.data.paging.AssetPagingSource
 import com.startup.graveyard.data.paging.UserAssetPagingSource
 import com.startup.graveyard.data.remote.AssetApi
+import com.startup.graveyard.domain.mappers.toDomain
 import com.startup.graveyard.domain.models.CreateAssetRequestModel
 import com.startup.graveyard.domain.models.CreateAssetResponseModel
 import com.startup.graveyard.domain.models.assets.Asset
+import com.startup.graveyard.domain.models.assets.GetSpecificAssetResponseModel
 import com.startup.graveyard.domain.models.getallassets.GetAllAssetsResponseModel
 import com.startup.graveyard.domain.repo.assetrepo.AssetRepository
 import kotlinx.coroutines.flow.Flow
@@ -73,5 +76,22 @@ class AssetRepositoryImpl @Inject constructor(
             }
         )
     }
+
+    override suspend fun getSpecificAssetByID(id: String): Flow<ResultState<Asset>> =
+        flow {
+            emit(ResultState.Loading)
+
+            try {
+                val response = assetApi.getAssetsSpecificDetails(id)
+                Log.d("SPECIFC-ASSET",response.toString())
+                if (response.isSuccessful && response.body() != null) {
+                    emit(ResultState.Success(response.body()!!.data.toDomain()))
+                } else {
+                    emit(ResultState.Error("Unable to load asset"))
+                }
+            } catch (e: Exception) {
+                emit(ResultState.Error(e.message ?: "Unknown error"))
+            }
+        }
 
 }

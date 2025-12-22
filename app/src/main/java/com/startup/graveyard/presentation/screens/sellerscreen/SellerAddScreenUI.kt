@@ -51,7 +51,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.google.firebase.auth.FirebaseAuth
 import com.startup.graveyard.domain.models.CreateAssetRequestModel
-import com.startup.graveyard.presentation.viewmodels.AssetViewModel
+import com.startup.graveyard.presentation.viewmodels.assets.AssetViewModel
 import com.startup.graveyard.utils.uploadImageToFirebase
 import kotlinx.coroutines.launch
 
