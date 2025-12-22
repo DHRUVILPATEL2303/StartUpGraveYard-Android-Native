@@ -10,9 +10,9 @@
               <option name="connection">
                 <ConnectionSetting>
                   <option name="appId" value="com.startup.graveyard" />
-                  <option name="mobileSdkAppId" value="1:537876451964:android:66488081749404c4bfeff9" />
-                  <option name="projectId" value="startupgraveyard" />
-                  <option name="projectNumber" value="537876451964" />
+                  <option name="mobileSdkAppId" value="1:195827597422:android:eb1f594f34f0b227c7267f" />
+                  <option name="projectId" value="startupgraveyard-ce246" />
+                  <option name="projectNumber" value="195827597422" />
                 </ConnectionSetting>
               </option>
               <option name="signal" value="SIGNAL_UNSPECIFIED" />

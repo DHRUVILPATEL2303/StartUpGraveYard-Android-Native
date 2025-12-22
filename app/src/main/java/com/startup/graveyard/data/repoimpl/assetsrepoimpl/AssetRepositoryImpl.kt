@@ -6,6 +6,7 @@ import androidx.paging.PagingConfig
 import com.google.firebase.auth.FirebaseAuth
 import com.startup.graveyard.common.ResultState
 import com.startup.graveyard.data.paging.AssetPagingSource
+import com.startup.graveyard.data.paging.UserAssetPagingSource
 import com.startup.graveyard.data.remote.AssetApi
 import com.startup.graveyard.domain.models.CreateAssetRequestModel
 import com.startup.graveyard.domain.models.CreateAssetResponseModel
@@ -45,13 +46,30 @@ class AssetRepositoryImpl @Inject constructor(
 
     override fun getAssetsPager(): Pager<Int, Asset> {
         return Pager(
-            config = PagingConfig(
-                pageSize = 10,
-                initialLoadSize = 10,
+            PagingConfig(
+                pageSize = 20,
+                initialLoadSize = 40,
+                prefetchDistance = 6,
                 enablePlaceholders = false
             ),
             pagingSourceFactory = {
                 AssetPagingSource(assetApi)
+            }
+        )
+    }
+
+    override fun getAllSpecificUserAsset(): Pager<Int, Asset> {
+
+        val userId = firebaseAuth.uid.toString()
+        return Pager(
+            PagingConfig(
+                pageSize = 20,
+                initialLoadSize = 40,
+                prefetchDistance = 6,
+                enablePlaceholders = false
+            ),
+            pagingSourceFactory = {
+                UserAssetPagingSource(assetApi, userId = userId)
             }
         )
     }

@@ -8,6 +8,7 @@ import com.startup.graveyard.domain.models.CreateAssetRequestModel
 import com.startup.graveyard.domain.models.CreateAssetResponseModel
 import com.startup.graveyard.domain.usecase.assetusecases.CreateAssetUseCase
 import com.startup.graveyard.domain.usecase.assetusecases.GetAssetsPagerUseCase
+import com.startup.graveyard.domain.usecase.assetusecases.GetSpecificUserAssetUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -19,7 +20,8 @@ import javax.inject.Inject
 @HiltViewModel
 class AssetViewModel @Inject constructor(
     private val createAssetUseCase: CreateAssetUseCase,
-    private val getAssetsPagerUseCase: GetAssetsPagerUseCase
+    private val getAssetsPagerUseCase: GetAssetsPagerUseCase,
+    private val getSpecificUserAssetUseCase: GetSpecificUserAssetUseCase
 ) : ViewModel() {
 
 
@@ -56,6 +58,10 @@ class AssetViewModel @Inject constructor(
         getAssetsPagerUseCase()
             .flow
             .cachedIn(viewModelScope)
+
+    val specificUserAssetFlow = getSpecificUserAssetUseCase()
+        .cachedIn(viewModelScope)
+
 
 
     val pagingKey = Any()

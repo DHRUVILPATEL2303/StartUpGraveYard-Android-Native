@@ -13,6 +13,7 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
+import okhttp3.OkHttpClient
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import javax.inject.Singleton
@@ -25,9 +26,10 @@ object DataModule {
 
     @Provides
     @Singleton
-    fun provideRetrofit(): Retrofit {
+    fun provideRetrofit(okHttpClient: OkHttpClient): Retrofit {
         return Retrofit.Builder()
             .baseUrl(BASE_URL)
+            .client(okHttpClient)
             .addConverterFactory(GsonConverterFactory.create())
             .build()
     }
@@ -46,14 +48,14 @@ object DataModule {
 
     @Provides
     @Singleton
-    fun provideAuthApi(): AuthApi {
-        return provideRetrofit().create(AuthApi::class.java)
+    fun provideAuthApi(okHttpClient: OkHttpClient): AuthApi {
+        return provideRetrofit(okHttpClient).create(AuthApi::class.java)
     }
 
     @Provides
     @Singleton
-    fun provideAssetApi(): AssetApi {
-        return provideRetrofit().create<AssetApi>(AssetApi::class.java)
+    fun provideAssetApi(okHttpClient: OkHttpClient): AssetApi {
+        return provideRetrofit(okHttpClient).create<AssetApi>(AssetApi::class.java)
     }
 
 }

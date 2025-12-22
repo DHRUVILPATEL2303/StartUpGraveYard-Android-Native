@@ -2,7 +2,6 @@
 
 package com.startup.graveyard.presentation.screens.sellerscreen
 
-import android.R
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -24,7 +23,6 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.CurrencyRupee
 import androidx.compose.material.icons.filled.Description
-import androidx.compose.material.icons.filled.Image
 import androidx.compose.material.icons.filled.Title
 import androidx.compose.material.icons.filled.Upload
 import androidx.compose.material3.*
@@ -52,7 +50,6 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.google.firebase.auth.FirebaseAuth
-import com.startup.graveyard.common.ResultState
 import com.startup.graveyard.domain.models.CreateAssetRequestModel
 import com.startup.graveyard.presentation.viewmodels.AssetViewModel
 import com.startup.graveyard.utils.uploadImageToFirebase
@@ -64,7 +61,7 @@ enum class SellerTab {
 }
 
 @Composable
-fun SellerHomeScreenUI(
+fun SellerAddScreenUI(
     assetViewModel: AssetViewModel,
     firebaseAuth: FirebaseAuth
 ) {

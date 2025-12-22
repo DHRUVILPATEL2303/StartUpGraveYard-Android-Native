@@ -66,7 +66,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
-import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavController
 import androidx.navigation.NavDestination
 import androidx.navigation.NavDestination.Companion.hasRoute
@@ -79,7 +78,7 @@ import com.google.firebase.auth.FirebaseAuth
 import com.startup.graveyard.presentation.screens.accountscreen.AccountScreenUI
 import com.startup.graveyard.presentation.screens.buyerscreens.BuyerHomeScreenUI
 import com.startup.graveyard.presentation.screens.loginscreen.LoginScreenUI
-import com.startup.graveyard.presentation.screens.sellerscreen.SellerHomeScreenUI
+import com.startup.graveyard.presentation.screens.sellerscreen.SellerAddScreenUI
 import com.startup.graveyard.presentation.screens.signupscreen.SignUpScreenUI
 import com.startup.graveyard.presentation.screens.splashscreen.SplashScreenUI
 import com.startup.graveyard.presentation.screens.userselectionscreen.UserSelectionScreenUI
@@ -483,7 +482,7 @@ fun AppNavigation(
                         )
                     }
                 ) {
-                    SellerHomeScreenUI(assetViewModel=assetViewModel,firebaseAuth)
+                    SellerAddScreenUI(assetViewModel=assetViewModel,firebaseAuth)
                 }
             }
         }

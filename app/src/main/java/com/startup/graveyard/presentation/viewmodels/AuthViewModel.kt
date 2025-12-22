@@ -166,14 +166,34 @@ class AuthViewModel @Inject constructor(
             updateUserAccountUseCase.updateUserAccountUseCase(updateUserAccountRequestModel)
                 .collect {
                     when (it) {
-                        is ResultState.Error -> _updateAccountState.value =
-                            AuthState(isLoading = false, error = it.error)
+                        is ResultState.Loading -> {
+                            _updateAccountState.value = AuthState(isLoading = true)
+                        }
 
-                        is ResultState.Loading -> _updateAccountState.value =
-                            AuthState(isLoading = true)
+                        is ResultState.Error -> {
+                            _updateAccountState.value =
+                                AuthState(isLoading = false, error = it.error)
+                        }
 
-                        is ResultState.Success -> _updateAccountState.value =
-                            AuthState(data = it.data, isLoading = false)
+                        is ResultState.Success -> {
+                            _updateAccountState.value =
+                                AuthState(data = it.data, isLoading = false)
+
+                            val currentAccount = _accountState.value.data
+                            if (currentAccount != null) {
+                                _accountState.value = AuthState(
+                                    data = currentAccount.copy(
+                                        data = currentAccount.data.copy(
+                                            name = updateUserAccountRequestModel.name,
+                                            profile_pic_url = updateUserAccountRequestModel.profile_pic_url
+                                        )
+                                    ),
+                                    isLoading = false
+                                )
+                            }
+
+                            getUserAccountDetails(forceRefresh = true)
+                        }
                     }
                 }
         }
@@ -196,18 +216,20 @@ class AuthViewModel @Inject constructor(
         }
     }
 
-    fun getUserAccountDetails() {
+    fun getUserAccountDetails(forceRefresh: Boolean = false) {
+        if (!forceRefresh && _accountState.value.data != null) return
 
-        if (_accountState.value.data != null) return
         viewModelScope.launch(Dispatchers.IO) {
             getUserAccountDetailsUseCase.getUserAccountUseCase().collect {
                 when (it) {
-                    is ResultState.Error -> _accountState.value =
-                        AuthState(error = it.error, isLoading = false)
+                    is ResultState.Error ->
+                        _accountState.value = AuthState(error = it.error)
 
-                    is ResultState.Loading -> _accountState.value = AuthState(isLoading = true)
-                    is ResultState.Success -> _accountState.value =
-                        AuthState(isLoading = false, data = it.data)
+                    is ResultState.Loading ->
+                        _accountState.value = AuthState(isLoading = true)
+
+                    is ResultState.Success ->
+                        _accountState.value = AuthState(data = it.data)
                 }
             }
         }

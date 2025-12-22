@@ -2,6 +2,7 @@ package com.startup.graveyard.data.remote
 
 import com.startup.graveyard.domain.models.CreateAssetRequestModel
 import com.startup.graveyard.domain.models.CreateAssetResponseModel
+import com.startup.graveyard.domain.models.getallassets.GetAllAssetsOfSpecificUserResponseModel
 import com.startup.graveyard.domain.models.getallassets.GetAllAssetsResponseModel
 import retrofit2.Response
 import retrofit2.http.*
@@ -18,4 +19,11 @@ interface AssetApi {
         @Query("page") page: Int,
         @Query("limit") limit: Int
     ): GetAllAssetsResponseModel
+
+    @GET("/users/{uid}/assets")
+    suspend fun getAllAssetsOfSpecificUser(
+        @Path("uid") uid : String,
+        @Query("page") page : Int,
+        @Query("limit") limit : Int
+    ): GetAllAssetsOfSpecificUserResponseModel
 }

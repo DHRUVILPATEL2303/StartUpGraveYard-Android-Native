@@ -206,6 +206,8 @@ fun AccountScreenUI(
                                             ?: user.profile_pic_url
                                     )
                                 )
+
+                                viewModel.getUserAccountDetails(forceRefresh = true)
                                 isEditMode = false
                             },
                             colors = ButtonDefaults.buttonColors(

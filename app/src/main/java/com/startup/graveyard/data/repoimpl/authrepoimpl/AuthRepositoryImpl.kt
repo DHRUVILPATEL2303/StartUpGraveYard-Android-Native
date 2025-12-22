@@ -254,7 +254,7 @@ class AuthRepositoryImpl @Inject constructor(
         try {
             val email = firebaseAuth.currentUser?.email ?: ""
             val response = authApi.checkVerificationStatsu(
-                checkVerificationStatusRequestModel = CheckVerificationStatusRequestModel(email)
+                email
             )
             if (response.isSuccessful && response.body() != null) {
                 emit(ResultState.Success(response.body()!!))

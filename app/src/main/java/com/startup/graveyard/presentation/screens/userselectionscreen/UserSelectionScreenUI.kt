@@ -62,9 +62,9 @@ fun UserSelectionScreenUI(
     val colorScheme = MaterialTheme.colorScheme
     val typography = MaterialTheme.typography
     LaunchedEffect(accountState.data) {
-        if (accountState.data == null) {
+//        if (accountState.data == null) {
             authViewModel.getUserAccountDetails()
-        }
+//        }
     }
 
     LaunchedEffect(verificationState.data) {
