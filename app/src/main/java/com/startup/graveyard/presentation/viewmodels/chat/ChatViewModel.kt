@@ -1,22 +1,36 @@
 package com.startup.graveyard.presentation.viewmodels.chat
 
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.google.firebase.auth.FirebaseAuth
 import com.startup.graveyard.cache.chatmemorycache.ChatMemoryCache
 import com.startup.graveyard.data.chat.ChatSocketManager
+import com.startup.graveyard.data.mappers.mesageentitymappers.toEntity
+import com.startup.graveyard.domain.repo.chatrepo.ChatRepository
+import com.startup.graveyard.presentation.models.ChatItemUI
 import com.startup.graveyard.utils.MessageUI
 import com.startup.graveyard.utils.SendStatus
 import com.startup.graveyard.utils.chatKey
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
 class ChatViewModel @Inject constructor(
     private val socket: ChatSocketManager,
-    private val cache: ChatMemoryCache
+    private val cache: ChatMemoryCache,
+    private val chatRepository: ChatRepository,
+    private val firebaseAuth: FirebaseAuth
 ) : ViewModel() {
 
-    fun connect(userId: String) {
-        socket.connect(userId)
+    init {
+        if (firebaseAuth.uid!=null){
+            connect(firebaseAuth.uid.toString())
+        }
+    }
+
+    fun connect(selfId: String) {
+        socket.connect(selfId)
     }
 
     fun disconnect() {
@@ -37,14 +51,31 @@ class ChatViewModel @Inject constructor(
         )
 
         cache.appendMessage(key, msg)
+
+        viewModelScope.launch {
+            chatRepository.saveMessage(msg.toEntity(key))
+
+        }
+
         socket.sendMessage(msg)
     }
 
+    fun chatList(selfId: String): List<ChatItemUI> {
+        return cache.getChatList(selfId)
+    }
+
+    fun messages(chatKey: String) =
+        cache.getMessages(chatKey)
+
     fun markRead(chatKey: String) {
         val ids = cache.getMessages(chatKey)
-            .filter { !it.isRead }
-            .map { it.localId }
+            .filter { !it.isRead && it.serverId != null }
+            .map { it.serverId!! }
 
-        socket.sendReadReceipt(ids)
+        if (ids.isNotEmpty()) {
+            socket.sendReadReceipt(ids)
+        }
     }
+
+
 }

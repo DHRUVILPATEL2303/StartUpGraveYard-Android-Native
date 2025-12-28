@@ -64,6 +64,14 @@ sealed class Routes {
         val id : String
     )
 
+
+    @Serializable
+    object ChatListScreen
+
+    @Serializable
+    data class ChatScreen(
+        val peerId: String
+    )
 }
 
 

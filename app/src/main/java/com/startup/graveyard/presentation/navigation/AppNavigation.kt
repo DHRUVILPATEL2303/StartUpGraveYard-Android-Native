@@ -79,6 +79,8 @@ import com.google.firebase.auth.FirebaseAuth
 import com.startup.graveyard.presentation.screens.accountscreen.AccountScreenUI
 import com.startup.graveyard.presentation.screens.buyerscreens.BuyerHomeScreenUI
 import com.startup.graveyard.presentation.screens.buyerscreens.BuyerSpecificAssetScreenUI
+import com.startup.graveyard.presentation.screens.chatscreen.ChatListScreen
+import com.startup.graveyard.presentation.screens.chatscreen.ChatScreen
 import com.startup.graveyard.presentation.screens.loginscreen.LoginScreenUI
 import com.startup.graveyard.presentation.screens.sellerscreen.SellerAddScreenUI
 import com.startup.graveyard.presentation.screens.sellerscreen.SellerDashboardScreenUI
@@ -89,6 +91,7 @@ import com.startup.graveyard.presentation.screens.verificationscreen.EmailVerifi
 import com.startup.graveyard.presentation.viewmodels.assets.AssetViewModel
 import com.startup.graveyard.presentation.viewmodels.AuthViewModel
 import com.startup.graveyard.presentation.viewmodels.SplashViewModel
+import com.startup.graveyard.presentation.viewmodels.chat.ChatViewModel
 
 private val BarBackgroundColor = Color(0xFF273646)
 private val ActiveIndicatorColor = Color(0xFFFFFFFF)
@@ -111,7 +114,8 @@ fun AppNavigation(
     firebaseAuth: FirebaseAuth,
     splashViewModel: SplashViewModel = hiltViewModel(),
     authViewModel: AuthViewModel = hiltViewModel<AuthViewModel>(),
-    assetViewModel: AssetViewModel = hiltViewModel<AssetViewModel>()
+    assetViewModel: AssetViewModel = hiltViewModel<AssetViewModel>(),
+    chatViewModel: ChatViewModel =hiltViewModel<ChatViewModel>()
 ) {
     val navController = rememberNavController()
 
@@ -433,7 +437,7 @@ fun AppNavigation(
                     })
 
                 }
-                composable<Routes.BuyerProductDetails>(
+                composable<Routes.ChatListScreen>(
                     enterTransition = {
                         slideIntoContainer(
                             AnimatedContentTransitionScope.SlideDirection.Left,
@@ -459,7 +463,33 @@ fun AppNavigation(
                         )
                     }
                 ) {
-                    BuyerProductDetailsScreen()
+                    ChatListScreen(
+                        selfId = firebaseAuth.uid.toString(),
+                        viewModel =chatViewModel ,
+                        onChatClick = {
+
+                        }
+                    )
+                }
+
+
+
+
+
+
+
+                composable<Routes.ChatScreen> {
+                    val peerID = it.toRoute<Routes.ChatScreen>().peerId
+
+                    ChatScreen(
+                        selfId = firebaseAuth.uid.toString(),
+                        peerId = peerID,
+                        viewModel = chatViewModel,
+                        onBack = {
+
+                        }
+                    )
+
                 }
             }
 
@@ -814,18 +844,18 @@ fun RowScope.ModernBottomBarItem(
                 modifier = Modifier
                     .size(if (selected) 48.dp else 24.dp)
             ) {
-                androidx.compose.animation.AnimatedVisibility(
-                    visible = selected,
-                    enter = fadeIn(),
-                    exit = fadeOut()
-                ) {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .clip(CircleShape)
-                            .background(ActiveIndicatorColor)
-                    )
-                }
+//                AnimatedVisibility(
+//                    visible = selected,
+//                    enter = fadeIn(),
+//                    exit = fadeOut()
+//                ) {
+//                    Box(
+//                        modifier = Modifier
+//                            .fillMaxSize()
+//                            .clip(CircleShape)
+//                            .background(ActiveIndicatorColor)
+//                    )
+//                }
 
                 Icon(
                     imageVector = icon,

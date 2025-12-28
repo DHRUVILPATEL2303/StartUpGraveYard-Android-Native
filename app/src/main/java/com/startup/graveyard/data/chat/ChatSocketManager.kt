@@ -1,12 +1,16 @@
 package com.startup.graveyard.data.chat
 
 import android.util.Log
+import androidx.compose.ui.platform.PlatformTextInputInterceptor
+import com.google.firebase.auth.FirebaseAuth
 import com.google.gson.Gson
 import com.startup.graveyard.cache.chatmemorycache.ChatMemoryCache
 import com.startup.graveyard.data.mappers.mesageentitymappers.toEntity
 import com.startup.graveyard.domain.repo.chatrepo.ChatRepository
 import com.startup.graveyard.network.WebSocketClient
+import com.startup.graveyard.network.websokcet.WsEvent
 import com.startup.graveyard.network.websokcet.WsSendMessage
+import com.startup.graveyard.network.websokcet.parseWsEvent
 import com.startup.graveyard.utils.MessageUI
 import com.startup.graveyard.utils.SendStatus
 import com.startup.graveyard.utils.chatKey
@@ -27,17 +31,25 @@ import kotlin.time.Instant
 class ChatSocketManager @Inject constructor(
     @WebSocketClient private val client: OkHttpClient,
     private val cache: ChatMemoryCache,
-    private val repository: ChatRepository
+    private val repository: ChatRepository,
+    private val firebaseAuth: FirebaseAuth
 ) {
 
     private var socket: WebSocket? = null
     private var selfId: String? = null
 
+    private val uuid = firebaseAuth.uid
+
     fun connect(userId: String) {
+        require(userId.isNotBlank()) { "userId cannot be empty" }
+
         selfId = userId
 
+        val url = "ws://grveyard-backend.onrender.com/ws/chat?user_id=$userId"
+        Log.d("WS", "Connecting to $url")
+
         val request = Request.Builder()
-            .url("ws://localhost:8080/ws/chat?user_id=$userId")
+            .url(url)
             .build()
 
         socket = client.newWebSocket(request, listener)
@@ -46,6 +58,7 @@ class ChatSocketManager @Inject constructor(
     fun disconnect() {
         socket?.close(1000, "User disconnected")
         socket = null
+        selfId = null
     }
 
 
@@ -55,11 +68,12 @@ class ChatSocketManager @Inject constructor(
             content = msg.content,
             message_type = msg.messageType
         )
-
         socket?.send(Gson().toJson(payload))
     }
 
     fun sendReadReceipt(messageIds: List<String>) {
+        if (messageIds.isEmpty()) return
+
         val payload = mapOf(
             "event_type" to "message_read",
             "message_ids" to messageIds
@@ -71,11 +85,35 @@ class ChatSocketManager @Inject constructor(
     private val listener = object : WebSocketListener() {
 
         override fun onOpen(ws: WebSocket, response: Response) {
-            Log.d("WS", "Connected")
+            Log.d("WS", "Connected as $selfId")
         }
 
         override fun onMessage(ws: WebSocket, text: String) {
-            handleIncoming(text)
+            when (val event = parseWsEvent(text)) {
+
+                is WsEvent.IncomingMessage -> {
+                    val msg = event.message
+                    val key = chatKey(msg.senderId, msg.receiverId)
+
+                    cache.appendMessage(key, msg)
+
+                    CoroutineScope(Dispatchers.IO).launch {
+                        repository.saveMessage(msg.toEntity(key))
+                    }
+                }
+
+                is WsEvent.Ack -> {
+                    handleAck(event.messageId, event.status)
+                }
+
+                is WsEvent.ReadReceipt -> {
+                    handleReadReceipt(event.ids)
+                }
+
+                is WsEvent.Unknown -> {
+                    Log.w("WS", "Unknown payload: ${event.raw}")
+                }
+            }
         }
 
         override fun onFailure(
@@ -83,27 +121,15 @@ class ChatSocketManager @Inject constructor(
             t: Throwable,
             response: Response?
         ) {
-            Log.e("WS", "Error", t)
+            Log.e("WS", "Socket error", t)
         }
     }
 
 
-    private fun handleIncoming(json: String) {
-        val obj = JSONObject(json)
-
-        when {
-            obj.has("status") -> handleAck(obj)
-            obj.has("event_type") -> handleReadReceipt(obj)
-            obj.has("sender_id") -> handleIncomingMessage(obj)
-        }
-    }
-
-    private fun handleAck(obj: JSONObject) {
-        val status = obj.getString("status")
-
+    private fun handleAck(messageId: String, status: String) {
         cache.getMessagesForAllChats()
             .flatten()
-            .lastOrNull { it.sendStatus == SendStatus.SENDING }
+            .find { it.serverId == messageId }
             ?.apply {
                 sendStatus =
                     if (status == "sent") SendStatus.SENT
@@ -111,37 +137,10 @@ class ChatSocketManager @Inject constructor(
             }
     }
 
-    private fun handleIncomingMessage(obj: JSONObject) {
-        val msg = MessageUI(
-            senderId = obj.getString("sender_id"),
-            receiverId = obj.getString("receiver_id"),
-            content = obj.getString("content"),
-            messageType = obj.getInt("message_type"),
-            isRead = obj.getBoolean("is_read"),
-            timestamp = java.time.Instant.parse(obj.getString("timestamp")).epochSecond,
-            sendStatus = SendStatus.SENT
-        )
-
-        val key = chatKey(msg.senderId, msg.receiverId)
-
-        cache.appendMessage(key, msg)
-
-        CoroutineScope(Dispatchers.IO).launch {
-            repository.saveMessage(msg.toEntity(key))
-        }
-    }
-
-    private fun handleReadReceipt(obj: JSONObject) {
-        val ids = obj.getJSONArray("message_ids")
-        val readBy = obj.getString("read_by")
-
-        val idList = (0 until ids.length()).map {
-            ids.getString(it)
-        }
-
+    private fun handleReadReceipt(ids: List<String>) {
         cache.getMessagesForAllChats()
             .flatten()
-            .filter { it.senderId == selfId && it.localId in idList }
+            .filter { it.serverId in ids }
             .forEach { it.isRead = true }
     }
 }

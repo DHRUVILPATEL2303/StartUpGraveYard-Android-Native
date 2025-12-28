@@ -10,16 +10,16 @@ fun chatKey(userA: String, userB: String): String {
     }
 }
 
+
 data class MessageUI(
     val localId: String = UUID.randomUUID().toString(),
-
+    val serverId: String? = null, // <-- IMPORTANT
     val senderId: String,
     val receiverId: String,
     val content: String,
     val messageType: Int,
     val timestamp: Long,
     var isRead: Boolean,
-
     var sendStatus: SendStatus
 )
 
