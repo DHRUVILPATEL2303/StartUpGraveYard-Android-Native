@@ -24,15 +24,7 @@ import javax.inject.Singleton
 object DataModule {
 
 
-    @Provides
-    @Singleton
-    fun provideRetrofit(okHttpClient: OkHttpClient): Retrofit {
-        return Retrofit.Builder()
-            .baseUrl(BASE_URL)
-            .client(okHttpClient)
-            .addConverterFactory(GsonConverterFactory.create())
-            .build()
-    }
+
 
     @Provides
     @Singleton
@@ -40,22 +32,9 @@ object DataModule {
         return FirebaseAuth.getInstance()
     }
 
-    @Provides
-    @Singleton
-    fun provideContext(@ApplicationContext context: Context): Context {
-        return context
-    }
 
-    @Provides
-    @Singleton
-    fun provideAuthApi(okHttpClient: OkHttpClient): AuthApi {
-        return provideRetrofit(okHttpClient).create(AuthApi::class.java)
-    }
 
-    @Provides
-    @Singleton
-    fun provideAssetApi(okHttpClient: OkHttpClient): AssetApi {
-        return provideRetrofit(okHttpClient).create<AssetApi>(AssetApi::class.java)
-    }
+
+
 
 }

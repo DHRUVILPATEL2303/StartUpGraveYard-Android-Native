@@ -24,11 +24,8 @@ object NetworkModule {
     @Singleton
     fun provideCache(
         @ApplicationContext context: Context
-    ): Cache {
-        val cacheSize = 20L * 1024 * 1024
-        return Cache(context.cacheDir, cacheSize)
-    }
-
+    ): Cache =
+        Cache(context.cacheDir, 20L * 1024 * 1024)
 
     @Provides
     @Singleton
@@ -42,8 +39,6 @@ object NetworkModule {
                 .build()
         }
 
-
-
     @Provides
     @Singleton
     @OfflineInterceptor
@@ -52,7 +47,6 @@ object NetworkModule {
     ): Interceptor =
         Interceptor { chain ->
             var request = chain.request()
-
             if (!NetworkUtil.hasInternet(context)) {
                 request = request.newBuilder()
                     .cacheControl(
@@ -65,17 +59,21 @@ object NetworkModule {
             }
             chain.proceed(request)
         }
+
     @Provides
     @Singleton
-    fun provideOkHttpClient(
+    @RestClient
+    fun provideRestOkHttp(
         cache: Cache,
-        @OnlineInterceptor onlineInterceptor: Interceptor,
-        @OfflineInterceptor offlineInterceptor: Interceptor
+        @OfflineInterceptor offline: Interceptor,
+        @OnlineInterceptor online: Interceptor
     ): OkHttpClient =
         OkHttpClient.Builder()
             .cache(cache)
-            .addInterceptor(offlineInterceptor)
-            .addNetworkInterceptor(onlineInterceptor)
+            .addInterceptor(offline)
+            .addNetworkInterceptor(online)
+            .connectTimeout(15, TimeUnit.SECONDS)
+            .readTimeout(20, TimeUnit.SECONDS)
             .build()
 }
 

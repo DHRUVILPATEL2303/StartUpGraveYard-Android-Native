@@ -89,9 +89,12 @@ dependencies {
 
     implementation("com.squareup.retrofit2:retrofit:3.0.0")
     implementation("com.squareup.retrofit2:converter-gson:3.0.0")
-
+    implementation("androidx.room:room-runtime:2.8.4")
+    implementation("androidx.room:room-ktx:2.8.4")
+    ksp("androidx.room:room-compiler:2.8.4")
 
     implementation("com.squareup.okhttp3:okhttp:5.3.2")
+    implementation("com.squareup.okhttp3:logging-interceptor:5.3.2")
     implementation("com.airbnb.android:lottie-compose:6.7.1")
     implementation("com.google.accompanist:accompanist-navigation-animation:0.36.0")
 
@@ -105,7 +108,9 @@ dependencies {
 
     //viewmodel lifecycle
     implementation("androidx.lifecycle:lifecycle-runtime-compose:2.10.0")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.10.2")
 
+    implementation("com.google.code.gson:gson:2.13.2")
     implementation("androidx.compose.material3:material3-android:1.5.0-alpha04")
 
     implementation("com.google.accompanist:accompanist-pager:0.36.0")
