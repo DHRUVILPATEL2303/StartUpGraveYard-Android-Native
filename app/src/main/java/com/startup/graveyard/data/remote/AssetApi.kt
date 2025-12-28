@@ -32,4 +32,6 @@ interface AssetApi {
     suspend fun getAssetsSpecificDetails(
         @Path("id") id : String
     ): Response<GetSpecificAssetResponseModel>
+
+//    @DELETE("")
 }
