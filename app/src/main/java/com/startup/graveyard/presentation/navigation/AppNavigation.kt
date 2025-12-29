@@ -302,6 +302,11 @@ fun AppNavigation(
                     }
                 ) {
                     UserSelectionScreenUI(
+                        firebaseAuth=firebaseAuth
+                        ,
+                        chatViewModel = chatViewModel
+                        ,
+
                         onBuyerSelected = {
                             navController.navigate(SubNavigation.BuyerRoutes)
                         },

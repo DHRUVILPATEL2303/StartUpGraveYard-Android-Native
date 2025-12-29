@@ -44,14 +44,18 @@ import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.google.firebase.auth.FirebaseAuth
+import com.startup.graveyard.presentation.viewmodels.chat.ChatViewModel
 
 
 @Composable
 fun UserSelectionScreenUI(
     onBuyerSelected: () -> Unit,
     onSellerSelected: () -> Unit,
+    firebaseAuth: FirebaseAuth,
     navController: NavController,
-    authViewModel: AuthViewModel = hiltViewModel()
+    authViewModel: AuthViewModel = hiltViewModel(),
+    chatViewModel: ChatViewModel
 ) {
     val accountState by authViewModel.accountState.collectAsStateWithLifecycle()
     val verificationState by authViewModel.checkVerificationState.collectAsStateWithLifecycle()
@@ -61,6 +65,13 @@ fun UserSelectionScreenUI(
 
     val colorScheme = MaterialTheme.colorScheme
     val typography = MaterialTheme.typography
+
+    if (firebaseAuth.uid!=null){
+        LaunchedEffect(Unit) {
+            chatViewModel.connect(firebaseAuth.uid!!)
+        }
+    }
+
     LaunchedEffect(accountState.data) {
 //        if (accountState.data == null) {
             authViewModel.getUserAccountDetails()
