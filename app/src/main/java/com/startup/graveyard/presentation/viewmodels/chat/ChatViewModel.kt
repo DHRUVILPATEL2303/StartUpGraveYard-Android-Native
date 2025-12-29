@@ -43,7 +43,7 @@ class ChatViewModel @Inject constructor(
         selfId?.let {
             preloadChats(it)
             loadChatList(it)
-            connect(it)
+//            connect(it)
         }
     }
 
