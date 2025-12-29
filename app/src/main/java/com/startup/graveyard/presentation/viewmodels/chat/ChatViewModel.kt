@@ -39,12 +39,6 @@ class ChatViewModel @Inject constructor(
     val chatList = _chatList
 
 
-
-
-
-
-
-
     init {
         selfId?.let {
             preloadChats(it)
@@ -80,17 +74,18 @@ class ChatViewModel @Inject constructor(
         viewModelScope.launch {
             chatRepository.saveMessage(msg.toEntity(key))
 
+
         }
 
         socket.sendMessage(msg)
+
     }
 
     fun chatList(): List<ChatItemUI> {
-            return selfId?.let {
+        return selfId?.let {
 
-                   cache.getChatList(selfId)} ?: emptyList()
-
-
+            cache.getChatList(selfId)
+        } ?: emptyList()
 
 
     }
@@ -98,8 +93,11 @@ class ChatViewModel @Inject constructor(
     private fun loadChatList(selfId: String) {
         viewModelScope.launch {
             val chats = chatRepository.loadChatSummaries(selfId)
-
-            chats.forEach { cache.seedChat(it) }
+            chats.forEach {
+                if (cache.getMessages(it.chatKey).isEmpty()) {
+                    cache.seedChat(it)
+                }
+            }
 
             _chatList.value = chats
         }
@@ -110,9 +108,10 @@ class ChatViewModel @Inject constructor(
 
         viewModelScope.launch {
             val localMessages =
-                chatRepository.getLocalMessages(chatKey, limit = 50)
+                chatRepository
+                    .getLocalMessages(chatKey, limit = 50)
                     .map { it.toUI() }
-
+                    .reversed()
 
 
             cache.setMessages(chatKey, localMessages, self)
@@ -132,7 +131,7 @@ class ChatViewModel @Inject constructor(
         }
     }
 
-  fun preloadChats(selfId: String) {
+    fun preloadChats(selfId: String) {
         viewModelScope.launch {
             chatRepository.loadChatSummaries(selfId)
                 .forEach { cache.seedChat(it) }

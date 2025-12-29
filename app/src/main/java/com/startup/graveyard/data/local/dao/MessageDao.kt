@@ -12,11 +12,11 @@ import com.startup.graveyard.domain.models.ChatSummary
 interface MessageDao {
 
     @Query("""
-        SELECT * FROM messages
-        WHERE chatKey = :chatKey
-        ORDER BY timestamp ASC
-        LIMIT :limit
-    """)
+    SELECT * FROM messages
+    WHERE chatKey = :chatKey
+    ORDER BY timestamp DESC
+    LIMIT :limit
+""")
     suspend fun getLatest(
         chatKey: String,
         limit: Int

@@ -19,18 +19,10 @@ class ChatMemoryCache {
     fun seedChat(summary: ChatSummary) {
         chatMap.putIfAbsent(
             summary.chatKey,
-            mutableStateListOf(
-                MessageUI(
-                    senderId = summary.peerId,
-                    receiverId = "",
-                    content = summary.lastMessage,
-                    timestamp = summary.timestamp,
-                    messageType = 0,
-                    isRead = summary.unreadCount == 0,
-                    sendStatus = SendStatus.SENT
-                )
-            )
+            mutableStateListOf()
         )
+
+        chatSummaries[summary.chatKey] = summary
     }
     fun updateMessageStatus(
         serverId: String,
