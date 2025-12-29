@@ -16,38 +16,51 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.startup.graveyard.domain.models.ChatSummary
 import com.startup.graveyard.presentation.models.ChatItemUI
 import com.startup.graveyard.presentation.viewmodels.chat.ChatViewModel
 
 
+fun ChatSummary.toUI(): ChatItemUI {
+    return ChatItemUI(
+        peerId = peerId,
+        lastMessage = lastMessage,
+        timestamp = timestamp,
+        unreadCount = unreadCount
+    )
+}
 @Composable
 fun ChatListScreen(
-    selfId: String,
     viewModel: ChatViewModel,
-    onChatClick: (peerId: String) -> Unit
+    onChatClick: (String) -> Unit,
+    selfId: String
 ) {
-    val chats = viewModel.chatList(selfId)
+    val chats by viewModel.chatList
 
     LazyColumn(
         modifier = Modifier.fillMaxSize()
     ) {
         items(
             items = chats,
-            key = { it.peerId }
-        ) { chat ->
-            ChatRow(chat = chat) {
-                onChatClick(chat.peerId)
-            }
+            key = { it.chatKey }
+        ) { chatSummary ->
+
+            val chat = chatSummary.toUI()
+
+            ChatRow(
+                chat = chat,
+                onClick = { onChatClick(chat.peerId) }
+            )
         }
     }
 }
-
 @Composable
 fun ChatRow(
     chat: ChatItemUI,

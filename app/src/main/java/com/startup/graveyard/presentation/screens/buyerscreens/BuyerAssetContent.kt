@@ -48,7 +48,8 @@ import kotlinx.coroutines.launch
 @Composable
 fun BuyerAssetsContent(
     viewModel: AssetViewModel,
-    onAssetClick: (Int) -> Unit
+    onAssetClick: (Int) -> Unit,
+    onChatClick: (String) -> Unit
 ) {
     val assets = remember(viewModel.pagingKey) {
         viewModel.assetsPagingFlow
@@ -117,7 +118,10 @@ fun BuyerAssetsContent(
                     assets[index]?.let { asset ->
                         AssetCard(
                             asset = asset,
-                            onClick = { onAssetClick(asset.id) }
+                            onClick = { onAssetClick(asset.id) },
+                            onChatClick = {receiverId ->
+                                onChatClick(receiverId)
+                            }
                         )
                     }
                 }

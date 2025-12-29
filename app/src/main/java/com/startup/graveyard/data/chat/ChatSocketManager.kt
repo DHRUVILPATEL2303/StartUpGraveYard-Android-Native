@@ -1,7 +1,6 @@
 package com.startup.graveyard.data.chat
 
 import android.util.Log
-import androidx.compose.ui.platform.PlatformTextInputInterceptor
 import com.google.firebase.auth.FirebaseAuth
 import com.google.gson.Gson
 import com.startup.graveyard.cache.chatmemorycache.ChatMemoryCache
@@ -22,10 +21,8 @@ import okhttp3.Request
 import okhttp3.Response
 import okhttp3.WebSocket
 import okhttp3.WebSocketListener
-import org.json.JSONObject
 import javax.inject.Inject
 import javax.inject.Singleton
-import kotlin.time.Instant
 
 @Singleton
 class ChatSocketManager @Inject constructor(
@@ -69,6 +66,7 @@ class ChatSocketManager @Inject constructor(
             message_type = msg.messageType
         )
         socket?.send(Gson().toJson(payload))
+        Log.d("CHAT-MESSAGE-SEND",payload.toString())
     }
 
     fun sendReadReceipt(messageIds: List<String>) {
@@ -84,18 +82,18 @@ class ChatSocketManager @Inject constructor(
 
     private val listener = object : WebSocketListener() {
 
-        override fun onOpen(ws: WebSocket, response: Response) {
+        override fun onOpen(webSocket: WebSocket, response: Response) {
             Log.d("WS", "Connected as $selfId")
         }
 
-        override fun onMessage(ws: WebSocket, text: String) {
+        override fun onMessage(webSocket: WebSocket, text: String) {
             when (val event = parseWsEvent(text)) {
 
                 is WsEvent.IncomingMessage -> {
                     val msg = event.message
                     val key = chatKey(msg.senderId, msg.receiverId)
 
-                    cache.appendMessage(key, msg)
+                    cache.appendMessage(key, msg,selfId!!)
 
                     CoroutineScope(Dispatchers.IO).launch {
                         repository.saveMessage(msg.toEntity(key))
@@ -117,7 +115,7 @@ class ChatSocketManager @Inject constructor(
         }
 
         override fun onFailure(
-            ws: WebSocket,
+            webSocket: WebSocket,
             t: Throwable,
             response: Response?
         ) {

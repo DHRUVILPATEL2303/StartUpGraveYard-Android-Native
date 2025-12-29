@@ -12,7 +12,6 @@ sealed class WsEvent {
     data class ReadReceipt(val ids: List<String>, val readBy: String) : WsEvent()
     data class Unknown(val raw: String) : WsEvent()
 }
-
 fun parseWsEvent(json: String): WsEvent {
     val obj = JSONObject(json)
 
@@ -42,8 +41,8 @@ fun parseWsEvent(json: String): WsEvent {
                     senderId = obj.getString("sender_id"),
                     receiverId = obj.getString("receiver_id"),
                     content = obj.getString("content"),
-                    messageType = obj.getInt("message_type"),
-                    isRead = obj.getBoolean("is_read"),
+                    messageType = obj.optInt("message_type", 0),
+                    isRead = obj.optBoolean("is_read", false),
                     timestamp = Instant.parse(
                         obj.getString("timestamp")
                     ).epochSecond,

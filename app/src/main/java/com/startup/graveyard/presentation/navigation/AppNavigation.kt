@@ -36,6 +36,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Dashboard
 import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.MarkUnreadChatAlt
 import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.material.icons.filled.SwipeLeftAlt
 import androidx.compose.material3.Icon
@@ -100,7 +101,8 @@ private val InactiveIconColor = Color(0xFF9CA3AF)
 
 fun NavDestination?.isBuyerDestination(): Boolean {
     return this?.hasRoute<Routes.BuyerHome>() == true ||
-            this?.hasRoute<Routes.BuyerProductDetails>() == true
+            this?.hasRoute<Routes.BuyerProductDetails>() == true ||
+            this?.hasRoute<Routes.ChatListScreen>()==true
 }
 
 fun NavDestination?.isSellerDestination(): Boolean {
@@ -466,7 +468,8 @@ fun AppNavigation(
                     ChatListScreen(
                         selfId = firebaseAuth.uid.toString(),
                         viewModel =chatViewModel ,
-                        onChatClick = {
+                        onChatClick = {peerId ->
+                            navController.navigate(Routes.ChatScreen(peerId))
 
                         }
                     )
@@ -558,12 +561,12 @@ fun BuyerBottomBar(
     val destination = backStackEntry?.destination
 
     val isHome = destination?.hasRoute<Routes.BuyerHome>() == true
-    val isCart = destination?.hasRoute<Routes.BuyerProductDetails>() == true
+    val isChat = destination?.hasRoute<Routes.ChatListScreen>() == true
 
     AdaptiveBottomBar(
         isCollapsed = isCollapsed,
         onSwitchClick = { navController.goToUserSelection() },
-        selectedIcon = if (isCart) Icons.Default.ShoppingCart else Icons.Default.Home,
+        selectedIcon = if (isChat) Icons.Default.ShoppingCart else Icons.Default.Home,
         onCompactRightClick = onExpand,
         expandedContent = {
             ModernBottomBarItem(
@@ -579,11 +582,11 @@ fun BuyerBottomBar(
             )
 
             ModernBottomBarItem(
-                icon = Icons.Default.ShoppingCart,
+                icon = Icons.Default.MarkUnreadChatAlt,
                 label = "Cart",
-                selected = isCart,
+                selected = isChat ,
                 onClick = {
-                    navController.navigate(Routes.BuyerProductDetails) {
+                    navController.navigate(Routes.ChatListScreen) {
                         launchSingleTop = true
                     }
                 }

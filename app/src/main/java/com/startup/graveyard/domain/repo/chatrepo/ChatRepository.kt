@@ -2,6 +2,7 @@ package com.startup.graveyard.domain.repo.chatrepo
 
 
 import com.startup.graveyard.data.local.entity.MessageEntity
+import com.startup.graveyard.domain.models.ChatSummary
 import com.startup.graveyard.utils.MessageUI
 
 interface ChatRepository {
@@ -26,4 +27,6 @@ interface ChatRepository {
         limit: Int,
         before: Long
     ): List<MessageUI>
+
+    suspend fun loadChatSummaries(selfId: String): List<ChatSummary>
 }

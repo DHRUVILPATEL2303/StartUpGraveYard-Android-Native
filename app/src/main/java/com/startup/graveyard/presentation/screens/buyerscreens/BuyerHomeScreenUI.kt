@@ -64,6 +64,9 @@ fun BuyerHomeScreenUI(
                         viewModel = assetViewModel,
                         onAssetClick = { id->
                             navController.navigate(Routes.BuyerSpecificAssetScreen(id=id.toString()))
+                        },
+                        onChatClick = {reciverID ->
+                            navController.navigate(Routes.ChatScreen(reciverID))
                         }
                     )
                     BuyerHomeTab.PIVOT -> Box(

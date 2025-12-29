@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.* // Imports all layout components
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.BrokenImage
+import androidx.compose.material.icons.filled.ChatBubble
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Image
 import androidx.compose.material.icons.filled.Lock
@@ -34,7 +35,8 @@ import java.util.Locale
 @Composable
 fun AssetCard(
     asset: Asset,
-    onClick: () -> Unit
+    onClick: () -> Unit,
+    onChatClick: (String) -> Unit
 ) {
     val formattedPrice = NumberFormat.getCurrencyInstance(Locale("en", "IN")).format(asset.price)
 
@@ -145,6 +147,17 @@ fun AssetCard(
 
                     StatusChip(isSold = asset.isSold)
                 }
+
+                Spacer(modifier = Modifier.height(20.dp))
+
+                IconButton(onClick = {
+                    onChatClick(asset.userUuid)
+                }) {
+                    Icon(
+                        imageVector = Icons.Default.ChatBubble,
+                        contentDescription = "chat"
+                    )
+                }
             }
         }
     }
@@ -211,7 +224,7 @@ fun AssetCardPreview() {
 
     MaterialTheme {
         Box(modifier = Modifier.padding(10.dp)) {
-            AssetCard(asset = dummyAsset, onClick = {})
+            AssetCard(asset = dummyAsset, onClick = {}, onChatClick = {})
         }
     }
 }

@@ -211,7 +211,10 @@ fun SellerAssetItem(
     Column {
         AssetCard(
             asset = asset,
-            onClick = onAssetClick
+            onClick = onAssetClick,
+            onChatClick = {
+
+            }
         )
 
         Row(

@@ -6,6 +6,8 @@ package com.startup.graveyard.data.repoimpl.chatrepoimpl
 import com.startup.graveyard.data.local.dao.MessageDao
 import com.startup.graveyard.data.local.entity.MessageEntity
 import com.startup.graveyard.data.remote.ChatApi
+import com.startup.graveyard.domain.models.ChatSummary
+import com.startup.graveyard.domain.models.toDomain
 import com.startup.graveyard.domain.repo.chatrepo.ChatRepository
 import com.startup.graveyard.utils.MessageUI
 import com.startup.graveyard.utils.SendStatus
@@ -58,4 +60,9 @@ class ChatRepositoryImpl @Inject constructor(
             )
         }
     }
+
+    override suspend fun loadChatSummaries(selfId: String): List<ChatSummary> {
+        return dao.loadChatSummaries(selfId).map { it.toDomain() }
+    }
+
 }

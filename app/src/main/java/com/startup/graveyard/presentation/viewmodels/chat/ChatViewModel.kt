@@ -1,11 +1,13 @@
 package com.startup.graveyard.presentation.viewmodels.chat
 
+import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.firebase.auth.FirebaseAuth
 import com.startup.graveyard.cache.chatmemorycache.ChatMemoryCache
 import com.startup.graveyard.data.chat.ChatSocketManager
 import com.startup.graveyard.data.mappers.mesageentitymappers.toEntity
+import com.startup.graveyard.domain.models.ChatSummary
 import com.startup.graveyard.domain.repo.chatrepo.ChatRepository
 import com.startup.graveyard.presentation.models.ChatItemUI
 import com.startup.graveyard.utils.MessageUI
@@ -23,9 +25,16 @@ class ChatViewModel @Inject constructor(
     private val firebaseAuth: FirebaseAuth
 ) : ViewModel() {
 
+    private val selfId: String? = firebaseAuth.uid
+
+
+    private val _chatList = mutableStateOf<List<ChatSummary>>(emptyList())
+    val chatList = _chatList
     init {
-        if (firebaseAuth.uid!=null){
-            connect(firebaseAuth.uid.toString())
+        selfId?.let {
+            preloadChats(it)
+            loadChatList(it)
+            connect(it)
         }
     }
 
@@ -50,18 +59,33 @@ class ChatViewModel @Inject constructor(
             sendStatus = SendStatus.SENDING
         )
 
-        cache.appendMessage(key, msg)
+        cache.appendMessage(key, msg, self)
 
         viewModelScope.launch {
             chatRepository.saveMessage(msg.toEntity(key))
-
         }
 
         socket.sendMessage(msg)
     }
 
-    fun chatList(selfId: String): List<ChatItemUI> {
-        return cache.getChatList(selfId)
+    fun chatList(): List<ChatItemUI> {
+            return selfId?.let {
+
+                   cache.getChatList(selfId)} ?: emptyList()
+
+
+
+
+    }
+
+    private fun loadChatList(selfId: String) {
+        viewModelScope.launch {
+            val chats = chatRepository.loadChatSummaries(selfId)
+
+            chats.forEach { cache.seedChat(it) }
+
+            _chatList.value = chats
+        }
     }
 
     fun messages(chatKey: String) =
@@ -77,5 +101,10 @@ class ChatViewModel @Inject constructor(
         }
     }
 
-
+  fun preloadChats(selfId: String) {
+        viewModelScope.launch {
+            chatRepository.loadChatSummaries(selfId)
+                .forEach { cache.seedChat(it) }
+        }
+    }
 }
