@@ -1,12 +1,14 @@
 package com.startup.graveyard.presentation.viewmodels.chat
 
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.firebase.auth.FirebaseAuth
 import com.startup.graveyard.cache.chatmemorycache.ChatMemoryCache
 import com.startup.graveyard.data.chat.ChatSocketManager
 import com.startup.graveyard.data.mappers.mesageentitymappers.toEntity
+import com.startup.graveyard.data.mappers.mesageentitymappers.toUI
 import com.startup.graveyard.domain.models.ChatSummary
 import com.startup.graveyard.domain.repo.chatrepo.ChatRepository
 import com.startup.graveyard.presentation.models.ChatItemUI
@@ -14,6 +16,11 @@ import com.startup.graveyard.utils.MessageUI
 import com.startup.graveyard.utils.SendStatus
 import com.startup.graveyard.utils.chatKey
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -30,6 +37,14 @@ class ChatViewModel @Inject constructor(
 
     private val _chatList = mutableStateOf<List<ChatSummary>>(emptyList())
     val chatList = _chatList
+
+
+
+
+
+
+
+
     init {
         selfId?.let {
             preloadChats(it)
@@ -61,8 +76,10 @@ class ChatViewModel @Inject constructor(
 
         cache.appendMessage(key, msg, self)
 
+
         viewModelScope.launch {
             chatRepository.saveMessage(msg.toEntity(key))
+
         }
 
         socket.sendMessage(msg)
@@ -88,7 +105,21 @@ class ChatViewModel @Inject constructor(
         }
     }
 
-    fun messages(chatKey: String) =
+    fun loadMessages(chatKey: String, peerId: String) {
+        val self = selfId ?: return
+
+        viewModelScope.launch {
+            val localMessages =
+                chatRepository.getLocalMessages(chatKey, limit = 50)
+                    .map { it.toUI() }
+
+
+
+            cache.setMessages(chatKey, localMessages, self)
+        }
+    }
+
+    fun messages(chatKey: String): SnapshotStateList<MessageUI> =
         cache.getMessages(chatKey)
 
     fun markRead(chatKey: String) {

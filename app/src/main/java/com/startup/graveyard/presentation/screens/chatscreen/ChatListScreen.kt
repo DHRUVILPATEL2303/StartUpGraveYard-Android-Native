@@ -159,19 +159,7 @@ fun ChatRow(
                     modifier = Modifier.weight(1f)
                 )
 
-                if (isUnread) {
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Badge(
-                        containerColor = MaterialTheme.colorScheme.primary,
-                        contentColor = MaterialTheme.colorScheme.onPrimary,
-                    ) {
-                        Text(
-                            text = chat.unreadCount.toString(),
-                            modifier = Modifier.padding(horizontal = 4.dp),
-                            style = MaterialTheme.typography.labelSmall
-                        )
-                    }
-                }
+
             }
         }
     }
@@ -249,17 +237,14 @@ fun formatChatTimestamp(timestampSeconds: Long): String {
     val msgTime = Calendar.getInstance().apply { time = date }
 
     return when {
-        // Same day: Show time (10:30 AM)
         now.get(Calendar.YEAR) == msgTime.get(Calendar.YEAR) &&
                 now.get(Calendar.DAY_OF_YEAR) == msgTime.get(Calendar.DAY_OF_YEAR) -> {
             SimpleDateFormat("h:mm a", Locale.getDefault()).format(date)
         }
-        // Yesterday: Show "Yesterday"
         now.get(Calendar.YEAR) == msgTime.get(Calendar.YEAR) &&
                 now.get(Calendar.DAY_OF_YEAR) - msgTime.get(Calendar.DAY_OF_YEAR) == 1 -> {
             "Yesterday"
         }
-        // Older: Show date (Oct 24)
         else -> {
             SimpleDateFormat("MMM d", Locale.getDefault()).format(date)
         }

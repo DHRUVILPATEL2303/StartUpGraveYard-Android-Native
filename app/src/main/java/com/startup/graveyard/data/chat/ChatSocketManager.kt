@@ -95,10 +95,9 @@ class ChatSocketManager @Inject constructor(
                     Log.d("INCOMING SOCKET MESSAGE", msg.toString())
                     val key = chatKey(msg.senderId, msg.receiverId)
 
-                    cache.appendMessage(key, msg,selfId!!)
-
                     CoroutineScope(Dispatchers.IO).launch {
                         repository.saveMessage(msg.toEntity(key))
+                        cache.appendMessage(key, msg, selfId!!)
                     }
                 }
 
