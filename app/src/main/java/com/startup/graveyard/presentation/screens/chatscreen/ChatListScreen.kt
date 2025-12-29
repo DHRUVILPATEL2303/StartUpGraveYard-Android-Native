@@ -2,31 +2,30 @@ package com.startup.graveyard.presentation.screens.chatscreen
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ChatBubble
+import androidx.compose.material.icons.filled.Search
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.startup.graveyard.domain.models.ChatSummary
 import com.startup.graveyard.presentation.models.ChatItemUI
 import com.startup.graveyard.presentation.viewmodels.chat.ChatViewModel
-
+import java.text.SimpleDateFormat
+import java.util.*
+import kotlin.math.abs
 
 fun ChatSummary.toUI(): ChatItemUI {
     return ChatItemUI(
@@ -36,6 +35,8 @@ fun ChatSummary.toUI(): ChatItemUI {
         unreadCount = unreadCount
     )
 }
+
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ChatListScreen(
     viewModel: ChatViewModel,
@@ -44,77 +45,223 @@ fun ChatListScreen(
 ) {
     val chats by viewModel.chatList
 
-    LazyColumn(
-        modifier = Modifier.fillMaxSize()
-    ) {
-        items(
-            items = chats,
-            key = { it.chatKey }
-        ) { chatSummary ->
-
-            val chat = chatSummary.toUI()
-
-            ChatRow(
-                chat = chat,
-                onClick = { onChatClick(chat.peerId) }
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = {
+                    Text(
+                        "Messages",
+                        style = MaterialTheme.typography.headlineMedium,
+                        fontWeight = FontWeight.Bold
+                    )
+                },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.background,
+                    titleContentColor = MaterialTheme.colorScheme.onBackground
+                ),
+                actions = {
+                    IconButton(onClick = {}) {
+                        Icon(
+                            imageVector = Icons.Default.Search,
+                            contentDescription = "Search",
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                }
             )
+        },
+        containerColor = MaterialTheme.colorScheme.background
+    ) { paddingValues ->
+
+        if (chats.isEmpty()) {
+            EmptyChatState(modifier = Modifier.padding(paddingValues))
+        } else {
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(paddingValues),
+                contentPadding = PaddingValues(top = 8.dp, bottom = 100.dp)
+            ) {
+                items(
+                    items = chats,
+                    key = { it.chatKey }
+                ) { chatSummary ->
+                    val chat = chatSummary.toUI()
+                    ChatRow(
+                        chat = chat,
+                        onClick = { onChatClick(chat.peerId) }
+                    )
+                    HorizontalDivider(
+                        modifier = Modifier.padding(start = 80.dp, end = 16.dp),
+                        color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f),
+                        thickness = 0.5.dp
+                    )
+                }
+            }
         }
     }
 }
+
 @Composable
 fun ChatRow(
     chat: ChatItemUI,
     onClick: () -> Unit
 ) {
+    val isUnread = chat.unreadCount > 0
+
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .clickable { onClick() }
-            .padding(12.dp),
+            .padding(horizontal = 16.dp, vertical = 12.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-
-        Box(
-            modifier = Modifier
-                .size(48.dp)
-                .background(Color.Gray, CircleShape)
+        ChatAvatar(
+            peerId = chat.peerId,
+            size = 56.dp
         )
 
-        Spacer(modifier = Modifier.width(12.dp))
+        Spacer(modifier = Modifier.width(16.dp))
 
-        Column(modifier = Modifier.weight(1f)) {
-            Text(
-                text = chat.peerId,
-                fontWeight = FontWeight.Bold
-            )
-            Text(
-                text = chat.lastMessage,
-                maxLines = 1,
-                color = Color.Gray
-            )
-        }
+        Column(
+            modifier = Modifier.weight(1f)
+        ) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text(
+                    text = "User ${chat.peerId.take(4)}",
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.SemiBold,
+                    color = MaterialTheme.colorScheme.onBackground,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier.weight(1f)
+                )
 
-        Column(horizontalAlignment = Alignment.End) {
-            Text(
-                text = chat.timestamp.toString(),
-                fontSize = 12.sp,
-                color = Color.Gray
-            )
+                Spacer(modifier = Modifier.width(8.dp))
 
-            if (chat.unreadCount > 0) {
-                Box(
-                    modifier = Modifier
-                        .padding(top = 4.dp)
-                        .background(Color.Green, CircleShape)
-                        .padding(horizontal = 8.dp, vertical = 2.dp)
-                ) {
-                    Text(
-                        text = chat.unreadCount.toString(),
-                        color = Color.White,
-                        fontSize = 12.sp
-                    )
+                Text(
+                    text = formatChatTimestamp(chat.timestamp),
+                    style = MaterialTheme.typography.labelSmall,
+                    color = if (isUnread) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+
+            Spacer(modifier = Modifier.height(4.dp))
+
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text(
+                    text = chat.lastMessage,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = if (isUnread) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurfaceVariant,
+                    fontWeight = if (isUnread) FontWeight.Medium else FontWeight.Normal,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier.weight(1f)
+                )
+
+                if (isUnread) {
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Badge(
+                        containerColor = MaterialTheme.colorScheme.primary,
+                        contentColor = MaterialTheme.colorScheme.onPrimary,
+                    ) {
+                        Text(
+                            text = chat.unreadCount.toString(),
+                            modifier = Modifier.padding(horizontal = 4.dp),
+                            style = MaterialTheme.typography.labelSmall
+                        )
+                    }
                 }
             }
+        }
+    }
+}
+
+@Composable
+fun ChatAvatar(
+    peerId: String,
+    size: androidx.compose.ui.unit.Dp
+) {
+    val color = remember(peerId) {
+        val hash = abs(peerId.hashCode())
+        val colors = listOf(
+            Color(0xFFEF5350), Color(0xFFAB47BC), Color(0xFF5C6BC0),
+            Color(0xFF29B6F6), Color(0xFF26A69A), Color(0xFF9CCC65),
+            Color(0xFFFFA726), Color(0xFF8D6E63)
+        )
+        colors[hash % colors.size]
+    }
+
+    Box(
+        modifier = Modifier
+            .size(size)
+            .clip(CircleShape)
+            .background(color),
+        contentAlignment = Alignment.Center
+    ) {
+        Text(
+            text = peerId.take(1).uppercase(),
+            color = Color.White,
+            style = MaterialTheme.typography.titleMedium,
+            fontWeight = FontWeight.Bold
+        )
+    }
+}
+
+@Composable
+fun EmptyChatState(modifier: Modifier = Modifier) {
+    Column(
+        modifier = modifier.fillMaxSize(),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
+        Box(
+            modifier = Modifier
+                .size(120.dp)
+                .background(MaterialTheme.colorScheme.surfaceContainerHighest, CircleShape),
+            contentAlignment = Alignment.Center
+        ) {
+            Icon(
+                imageVector = Icons.Default.ChatBubble,
+                contentDescription = null,
+                modifier = Modifier.size(64.dp),
+                tint = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
+        Spacer(modifier = Modifier.height(24.dp))
+        Text(
+            text = "No messages yet",
+            style = MaterialTheme.typography.headlineSmall,
+            color = MaterialTheme.colorScheme.onSurface
+        )
+        Spacer(modifier = Modifier.height(8.dp))
+        Text(
+            text = "Start connecting with sellers to see messages here.",
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+    }
+}
+
+fun formatChatTimestamp(timestampSeconds: Long): String {
+    val date = Date(timestampSeconds * 1000)
+    val now = Calendar.getInstance()
+    val msgTime = Calendar.getInstance().apply { time = date }
+
+    return when {
+        // Same day: Show time (10:30 AM)
+        now.get(Calendar.YEAR) == msgTime.get(Calendar.YEAR) &&
+                now.get(Calendar.DAY_OF_YEAR) == msgTime.get(Calendar.DAY_OF_YEAR) -> {
+            SimpleDateFormat("h:mm a", Locale.getDefault()).format(date)
+        }
+        // Yesterday: Show "Yesterday"
+        now.get(Calendar.YEAR) == msgTime.get(Calendar.YEAR) &&
+                now.get(Calendar.DAY_OF_YEAR) - msgTime.get(Calendar.DAY_OF_YEAR) == 1 -> {
+            "Yesterday"
+        }
+        // Older: Show date (Oct 24)
+        else -> {
+            SimpleDateFormat("MMM d", Locale.getDefault()).format(date)
         }
     }
 }

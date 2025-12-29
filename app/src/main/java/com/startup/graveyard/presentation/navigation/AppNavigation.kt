@@ -489,6 +489,7 @@ fun AppNavigation(
                         peerId = peerID,
                         viewModel = chatViewModel,
                         onBack = {
+                            navController.popBackStack()
 
                         }
                     )

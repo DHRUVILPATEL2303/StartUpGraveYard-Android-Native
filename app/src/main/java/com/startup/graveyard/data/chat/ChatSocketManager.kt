@@ -89,8 +89,10 @@ class ChatSocketManager @Inject constructor(
         override fun onMessage(webSocket: WebSocket, text: String) {
             when (val event = parseWsEvent(text)) {
 
+
                 is WsEvent.IncomingMessage -> {
                     val msg = event.message
+                    Log.d("INCOMING SOCKET MESSAGE", msg.toString())
                     val key = chatKey(msg.senderId, msg.receiverId)
 
                     cache.appendMessage(key, msg,selfId!!)
