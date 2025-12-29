@@ -32,6 +32,41 @@ class ChatMemoryCache {
             )
         )
     }
+    fun updateMessageStatus(
+        serverId: String,
+        newStatus: SendStatus
+    ) {
+        chatMap.values.forEach { list ->
+            val index = list.indexOfFirst { it.serverId == serverId }
+            if (index != -1) {
+                val old = list[index]
+                list[index] = old.copy(sendStatus = newStatus)
+            }
+        }
+    }
+
+
+    fun prependMessages(
+        chatKey: String,
+        messages: List<MessageUI>,
+        selfId: String
+    ) {
+        if (messages.isEmpty()) return
+
+        val list = getMessages(chatKey)
+
+        val existingIds =
+            list.mapNotNull { it.serverId }.toSet()
+
+        val newMessages =
+            messages.filter { it.serverId !in existingIds }
+
+        if (newMessages.isEmpty()) return
+
+        list.addAll(0, newMessages)
+
+        updateFromMessage(chatKey, list.last(), selfId)
+    }
 
     fun updateFromMessage(chatKey: String, msg: MessageUI, selfId: String) {
         val peer =
@@ -85,6 +120,35 @@ class ChatMemoryCache {
         }
     }
 
+    fun getQueuedMessages(): List<MessageUI> {
+        return chatMap.values
+            .flatten()
+            .filter { it.sendStatus == SendStatus.QUEUED }
+    }
+
+    fun markMessagesRead(ids: List<String>) {
+        chatMap.values.forEach { list ->
+            list.forEachIndexed { index, msg ->
+                if (msg.serverId in ids && !msg.isRead) {
+                    list[index] = msg.copy(isRead = true)
+                }
+            }
+        }
+    }
+
+
+    fun markSendingAsQueued() {
+        chatMap.values.forEach { list ->
+            list.forEachIndexed { index, msg ->
+                if (msg.sendStatus == SendStatus.SENDING) {
+                    list[index] = msg.copy(sendStatus = SendStatus.QUEUED)
+                }
+            }
+        }
+    }
+
+
     fun getMessagesForAllChats(): Collection<SnapshotStateList<MessageUI>> =
         chatMap.values
 }
+

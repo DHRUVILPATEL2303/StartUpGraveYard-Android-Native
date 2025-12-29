@@ -78,12 +78,22 @@ class ChatSocketManager @Inject constructor(
         )
         socket?.send(Gson().toJson(payload))
     }
-
+    private fun resendQueuedMessages() {
+        cache.getQueuedMessages().forEach { msg ->
+            val payload = WsSendMessage(
+                receiver_id = msg.receiverId,
+                content = msg.content,
+                message_type = msg.messageType
+            )
+            socket?.send(Gson().toJson(payload))
+        }
+    }
 
     private val listener = object : WebSocketListener() {
 
         override fun onOpen(webSocket: WebSocket, response: Response) {
             Log.d("WS", "Connected as $selfId")
+            resendQueuedMessages()
         }
 
         override fun onMessage(webSocket: WebSocket, text: String) {
@@ -121,25 +131,19 @@ class ChatSocketManager @Inject constructor(
             response: Response?
         ) {
             Log.e("WS", "Socket error", t)
+            cache.markSendingAsQueued()
         }
     }
 
 
     private fun handleAck(messageId: String, status: String) {
-        cache.getMessagesForAllChats()
-            .flatten()
-            .find { it.serverId == messageId }
-            ?.apply {
-                sendStatus =
-                    if (status == "sent") SendStatus.SENT
-                    else SendStatus.QUEUED
-            }
-    }
+        val newStatus =
+            if (status == "sent") SendStatus.SENT
+            else SendStatus.QUEUED
 
+        cache.updateMessageStatus(messageId, newStatus)
+    }
     private fun handleReadReceipt(ids: List<String>) {
-        cache.getMessagesForAllChats()
-            .flatten()
-            .filter { it.serverId in ids }
-            .forEach { it.isRead = true }
+        cache.markMessagesRead(ids)
     }
 }
