@@ -118,4 +118,7 @@ dependencies {
 
     implementation("com.google.accompanist:accompanist-permissions:0.37.0")
 
+    //credentials manager
+    implementation("androidx.credentials:credentials:1.5.0")
+
 }

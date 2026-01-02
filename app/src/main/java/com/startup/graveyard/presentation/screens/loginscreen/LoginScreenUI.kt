@@ -5,6 +5,12 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.credentials.CredentialManager
+import androidx.credentials.GetCredentialRequest
+import androidx.credentials.GetPasswordOption
+import androidx.credentials.PasswordCredential
+import androidx.credentials.CreatePasswordRequest
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
@@ -45,6 +51,35 @@ fun LoginScreenUI(
 ) {
     val email = remember { mutableStateOf("") }
     val password = remember { mutableStateOf("") }
+
+    val context = LocalContext.current
+    val credentialManager = remember {
+        CredentialManager.create(context)
+    }
+
+
+
+
+
+
+    LaunchedEffect(Unit) {
+        try {
+            val request = GetCredentialRequest(
+                listOf(GetPasswordOption())
+            )
+
+            val result = credentialManager.getCredential(
+                context = context,
+                request = request
+            )
+
+            val credential = result.credential as PasswordCredential
+            email.value = credential.id
+            password.value = credential.password
+
+        } catch (e: Exception) {
+        }
+    }
     val passwordVisible = remember { mutableStateOf(false) }
 
     val emailError = remember { mutableStateOf("") }
@@ -66,6 +101,20 @@ fun LoginScreenUI(
 
     LaunchedEffect(loginState) {
         if (loginState.data != null) {
+
+            try {
+                val request = CreatePasswordRequest(
+                    id = email.value,
+                    password = password.value
+                )
+
+                credentialManager.createCredential(
+                    context = context,
+                    request = request
+                )
+            } catch (e: Exception) {
+            }
+
             onLoginSuccess()
         }
     }
