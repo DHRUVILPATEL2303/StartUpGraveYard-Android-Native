@@ -474,7 +474,9 @@ fun AppNavigation(
                         selfId = firebaseAuth.uid.toString(),
                         viewModel =chatViewModel ,
                         onChatClick = {peerId ->
-                            navController.navigate(Routes.ChatScreen(peerId))
+                            navController.navigate(Routes.ChatScreen(peerId)){
+                                launchSingleTop = true
+                            }
 
                         }
                     )
