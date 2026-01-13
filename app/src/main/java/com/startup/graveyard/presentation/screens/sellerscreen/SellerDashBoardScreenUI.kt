@@ -39,6 +39,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.paging.LoadState
 import androidx.paging.compose.collectAsLazyPagingItems
+import com.google.firebase.auth.FirebaseAuth
 import com.startup.graveyard.domain.models.assets.Asset
 import com.startup.graveyard.presentation.screens.buyerscreens.components.AssetCard
 import com.startup.graveyard.presentation.screens.buyerscreens.components.StartupCard
@@ -55,7 +56,16 @@ fun SellerDashboardScreenUI(
 ) {
     var selectedTab by remember { mutableStateOf(SellerDashboardTab.MY_ASSETS) }
 
-    val myAssets = assetViewModel.specificUserAssetFlow.collectAsLazyPagingItems()
+    val userUuid = FirebaseAuth.getInstance().uid
+
+    LaunchedEffect(Unit) {
+        userUuid?.let {
+            assetViewModel.loadSellerAssets(it)
+        }
+    }
+
+
+    val myAssets = assetViewModel.assetsPagingFlow.collectAsLazyPagingItems()
 
     val haptic = LocalHapticFeedback.current
     val listState = rememberSaveable(saver = LazyListState.Saver) { LazyListState() }

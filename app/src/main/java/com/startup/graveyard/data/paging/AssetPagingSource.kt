@@ -3,26 +3,33 @@ package com.startup.graveyard.data.paging
 import androidx.paging.PagingSource
 import androidx.paging.PagingState
 import com.startup.graveyard.data.remote.AssetApi
+import com.startup.graveyard.data.remote.AssetFilter
 import com.startup.graveyard.domain.mappers.toDomain
 import com.startup.graveyard.domain.models.assets.Asset
 
-class AssetPagingSource(
-    private val assetApi: AssetApi
+class AssetsPagingSource(
+    private val assetApi: AssetApi,
+    private val filter: AssetFilter
 ) : PagingSource<Int, Asset>() {
 
     override suspend fun load(params: LoadParams<Int>): LoadResult<Int, Asset> {
+        val page = params.key ?: 1
+
         return try {
-            val page = params.key ?: 1
-            val limit = params.loadSize
+            val response = assetApi.getAllAssets(
+                page = page,
+                limit = params.loadSize,
+                userUuid = filter.userUuid,
+                assetType = filter.assetType,
+                isSold = filter.isSold
+            )
 
-            val response = assetApi.getAllAssets(page, limit)
-
-            val assets = response.data.items.map { it.toDomain() }
+            val items = response.data.items.map { it.toDomain() }
 
             LoadResult.Page(
-                data = assets,
+                data = items,
                 prevKey = if (page == 1) null else page - 1,
-                nextKey = if (assets.isEmpty()) null else page + 1
+                nextKey = if (items.isEmpty()) null else page + 1
             )
         } catch (e: Exception) {
             LoadResult.Error(e)

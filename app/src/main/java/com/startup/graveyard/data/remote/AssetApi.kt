@@ -18,20 +18,22 @@ interface AssetApi {
     @GET("/assets")
     suspend fun getAllAssets(
         @Query("page") page: Int,
-        @Query("limit") limit: Int
+        @Query("limit") limit: Int,
+        @Query("user_uuid") userUuid: String? = null,
+        @Query("asset_type") assetType: String? = null,
+        @Query("is_sold") isSold: Boolean? = null
     ): GetAllAssetsResponseModel
 
-    @GET("/users/{uid}/assets")
-    suspend fun getAllAssetsOfSpecificUser(
-        @Path("uid") uid : String,
-        @Query("page") page : Int,
-        @Query("limit") limit : Int
-    ): GetAllAssetsOfSpecificUserResponseModel
-
-    @GET("assets/{id}")
+    @GET("/assets/{id}")
     suspend fun getAssetsSpecificDetails(
-        @Path("id") id : String
+        @Path("id") id: String
     ): Response<GetSpecificAssetResponseModel>
-
-//    @DELETE("")
 }
+
+
+
+data class AssetFilter(
+    val userUuid: String? = null,
+    val assetType: String? = null,
+    val isSold: Boolean? = null
+)

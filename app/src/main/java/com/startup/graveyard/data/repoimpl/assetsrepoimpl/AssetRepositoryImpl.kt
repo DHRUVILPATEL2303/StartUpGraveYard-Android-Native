@@ -6,9 +6,9 @@ import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import com.google.firebase.auth.FirebaseAuth
 import com.startup.graveyard.common.ResultState
-import com.startup.graveyard.data.paging.AssetPagingSource
-import com.startup.graveyard.data.paging.UserAssetPagingSource
+import com.startup.graveyard.data.paging.AssetsPagingSource
 import com.startup.graveyard.data.remote.AssetApi
+import com.startup.graveyard.data.remote.AssetFilter
 import com.startup.graveyard.domain.mappers.toDomain
 import com.startup.graveyard.domain.models.CreateAssetRequestModel
 import com.startup.graveyard.domain.models.CreateAssetResponseModel
@@ -47,7 +47,10 @@ class AssetRepositoryImpl @Inject constructor(
             }
         }
 
-    override fun getAssetsPager(): Pager<Int, Asset> {
+    override fun getAssetsPager(
+        filter: AssetFilter
+    ): Pager<Int, Asset> {
+
         return Pager(
             PagingConfig(
                 pageSize = 20,
@@ -56,26 +59,14 @@ class AssetRepositoryImpl @Inject constructor(
                 enablePlaceholders = false
             ),
             pagingSourceFactory = {
-                AssetPagingSource(assetApi)
+                AssetsPagingSource(
+                    assetApi = assetApi,
+                    filter = filter
+                )
             }
         )
     }
 
-    override fun getAllSpecificUserAsset(): Pager<Int, Asset> {
-
-        val userId = firebaseAuth.uid.toString()
-        return Pager(
-            PagingConfig(
-                pageSize = 20,
-                initialLoadSize = 40,
-                prefetchDistance = 6,
-                enablePlaceholders = false
-            ),
-            pagingSourceFactory = {
-                UserAssetPagingSource(assetApi, userId = userId)
-            }
-        )
-    }
 
     override suspend fun getSpecificAssetByID(id: String): Flow<ResultState<Asset>> =
         flow {

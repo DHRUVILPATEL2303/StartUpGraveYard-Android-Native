@@ -3,6 +3,7 @@ package com.startup.graveyard.domain.repo.assetrepo
 import androidx.paging.Pager
 import androidx.paging.PagingData
 import com.startup.graveyard.common.ResultState
+import com.startup.graveyard.data.remote.AssetFilter
 import com.startup.graveyard.domain.models.CreateAssetRequestModel
 import com.startup.graveyard.domain.models.CreateAssetResponseModel
 import com.startup.graveyard.domain.models.assets.Asset
@@ -16,11 +17,11 @@ interface AssetRepository {
         createAssetRequestModel: CreateAssetRequestModel
     ): Flow<ResultState<CreateAssetResponseModel>>
 
-    fun getAssetsPager(): Pager<Int, Asset>
+    fun getAssetsPager(
+        filter: AssetFilter
+    ): Pager<Int, Asset>
 
-    fun getAllSpecificUserAsset() :Pager<Int, Asset>
-
-    suspend fun getSpecificAssetByID(id : String) : Flow<ResultState<Asset>>
-
-
+    suspend fun getSpecificAssetByID(
+        id: String
+    ): Flow<ResultState<Asset>>
 }
