@@ -73,7 +73,12 @@ fun BuyerHomeScreenUI(
                         modifier = Modifier.fillMaxSize(),
                         contentAlignment = Alignment.Center
                     ) {
-                        Text("Pivot Content Coming Soon", color = MaterialTheme.colorScheme.onSurface)
+                        BuyerPivotContent(
+                            onStartupClick = {
+
+                            }
+                        )
+
                     }
                 }
             }

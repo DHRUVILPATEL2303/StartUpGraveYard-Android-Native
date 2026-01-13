@@ -4,6 +4,7 @@ import com.startup.graveyard.common.BASE_URL
 import com.startup.graveyard.data.remote.AssetApi
 import com.startup.graveyard.data.remote.AuthApi
 import com.startup.graveyard.data.remote.ChatApi
+import com.startup.graveyard.data.remote.StartUpApi
 import com.startup.graveyard.network.RestClient
 import dagger.Module
 import dagger.Provides
@@ -45,4 +46,9 @@ object ApiModule {
     @Singleton
     fun provideChatApi(retrofit: Retrofit): ChatApi =
         retrofit.create(ChatApi::class.java)
+
+
+    @Provides
+    @Singleton
+    fun provideStartUpApi(retrofit: Retrofit) : StartUpApi =retrofit.create(StartUpApi::class.java)
 }
