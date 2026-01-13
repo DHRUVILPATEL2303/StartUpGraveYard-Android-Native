@@ -3,13 +3,15 @@ package com.startup.graveyard.presentation.viewmodels.startups
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.paging.cachedIn
+import com.startup.graveyard.domain.usecase.startupusecases.GetAllSpecificUserStartupUseCase
 import com.startup.graveyard.domain.usecase.startupusecases.GetAllStartUpUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 
 @HiltViewModel
 class StartUpViewModel @Inject constructor(
-    private val getAllStartUpUseCase: GetAllStartUpUseCase
+    private val getAllStartUpUseCase: GetAllStartUpUseCase,
+    private val getAllSpecificUserStartupUseCase: GetAllSpecificUserStartupUseCase
 ) : ViewModel(){
 
 
@@ -19,6 +21,10 @@ class StartUpViewModel @Inject constructor(
             .cachedIn(viewModelScope)
 
 
+    val specificUserStartUpsPagingFlow =
+        getAllSpecificUserStartupUseCase.getAllSpecificUserStartUpUseCase()
+            .flow
+            .cachedIn(viewModelScope)
 }
 
 data class StartUPState<T>(

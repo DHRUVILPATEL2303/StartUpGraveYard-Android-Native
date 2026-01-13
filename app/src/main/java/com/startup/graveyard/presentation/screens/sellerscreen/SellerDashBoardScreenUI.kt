@@ -36,10 +36,12 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.paging.LoadState
 import androidx.paging.compose.collectAsLazyPagingItems
 import com.startup.graveyard.domain.models.assets.Asset
 import com.startup.graveyard.presentation.screens.buyerscreens.components.AssetCard
+import com.startup.graveyard.presentation.screens.buyerscreens.components.StartupCard
 import com.startup.graveyard.presentation.viewmodels.assets.AssetViewModel
 
 enum class SellerDashboardTab {
@@ -174,13 +176,9 @@ fun SellerDashboardScreenUI(
                     }
 
                     SellerDashboardTab.MY_PIVOTS -> {
-                        Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                            Text(
-                                "My Pivots Coming Soon",
-                                style = MaterialTheme.typography.titleMedium,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                        }
+                        SellerPivotsContent(
+                            startUpViewModel = hiltViewModel()
+                        )
                     }
                 }
             }
@@ -400,5 +398,61 @@ fun SellerTabItem(
             style = MaterialTheme.typography.titleSmall,
             color = if (isSelected) selectedTextColor else unselectedTextColor
         )
+    }
+}
+
+
+@Composable
+fun SellerStartupItem(
+    startup: com.startup.graveyard.domain.models.startups.Startup,
+    onStartupClick: () -> Unit,
+    onEditClick: () -> Unit,
+    onDeleteClick: () -> Unit
+) {
+    Column {
+        StartupCard(
+            startup = startup,
+            onClick = onStartupClick
+        )
+
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp)
+                .offset(y = (-12).dp)
+                .shadow(4.dp, RoundedCornerShape(bottomStart = 16.dp, bottomEnd = 16.dp))
+                .clip(RoundedCornerShape(bottomStart = 16.dp, bottomEnd = 16.dp))
+                .background(MaterialTheme.colorScheme.surfaceContainer)
+                .border(
+                    1.dp,
+                    MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f),
+                    RoundedCornerShape(bottomStart = 16.dp, bottomEnd = 16.dp)
+                )
+                .padding(vertical = 4.dp),
+            horizontalArrangement = Arrangement.SpaceEvenly,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+
+            ActionButton(
+                text = "Update",
+                icon = Icons.Default.Edit,
+                color = MaterialTheme.colorScheme.primary,
+                onClick = onEditClick
+            )
+
+            Box(
+                modifier = Modifier
+                    .height(20.dp)
+                    .width(1.dp)
+                    .background(MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
+            )
+
+            ActionButton(
+                text = "Delete",
+                icon = Icons.Outlined.Delete,
+                color = MaterialTheme.colorScheme.error,
+                onClick = onDeleteClick
+            )
+        }
     }
 }
